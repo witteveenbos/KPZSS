@@ -78,3 +78,12 @@ ax[1].set_title(f'interpolated 1D bathy, spacing = {spacing} m')
 ax[1].set_xlabel('distance [m]')
 ax[1].set_ylabel('height [m NAP]')
 ax[1].legend()
+
+#%% export to text file
+save_file = path_dummy+'bottom.txt'
+df_xy.to_csv(save_file,columns = 'z_filled',sep=' ', index=False, header=False, float_format='%.3f')
+
+
+
+
+
