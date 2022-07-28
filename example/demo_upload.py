@@ -12,8 +12,7 @@ from ant import ant_helper_functions as ant_funcs
 
 # %% set some variables
 project_name = 'Systeemanalyse Waterveiligheid'
-session_name = 'test'
-calc_block_name = ''
+session_name = 'voorbeeld sessie databasemethode'
 output_table = 'Calc_output'
 
 # %% 
