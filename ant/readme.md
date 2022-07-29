@@ -1,5 +1,7 @@
 # How to use ANT
 
+This readme covers the basics about reading and writing form ANT that are important for this project. A more elaborate documentation about `antconnect` (the module we use) is given at [their documentation page](https://docs.antcde.io/ANTConnect/python/#verwijder-een-tabel)
+
 ## Make connection
 
 ### First time connection
