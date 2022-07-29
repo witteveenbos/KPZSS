@@ -33,9 +33,27 @@ ant_connection = ant_funcs.get_api_connection()
 
 This connection will be used later on to read tables and upload to them, but also to work with sessions
 
+## Read table 
+
+You can read items from a table after making API connection (see above) with the following code:
+
+```python
+
+# specify what to read
+project_name = 'Systeemanalyse Waterveiligheid'
+table_name = 'Calc_output'
+
+# get the project and table id
+project_id = ant_funcs.get_project_id(ant_connection, project_name=project_name)
+table_id = ant_funcs.get_table_id(ant_connection, project_id, table_name)
+
+ant_connection.records_read(project_id, table_id)
+
+```
+
 ## Upload to table
 
-Upload to a table can be done with and without linking to a session. This example shows how to upload without a session:
+Upload to a table can be done with and without linking to a session. This example shows how to upload without a session. You need to make an API connection first, see above.
 
 ```python
 # specify where to put it
