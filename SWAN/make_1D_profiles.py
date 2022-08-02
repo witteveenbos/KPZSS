@@ -16,8 +16,8 @@ path = 'z:\\130991_Systeemanalyse_ZSS\\2.Data\\bathy\\ontvangen\\WZ\\Niet meegro
 file = path+'Volledig_meegroeien_minimumbathy_0m.mat'
 
 path_dummy = 'z:\\130991_Systeemanalyse_ZSS\\2.Data\\dummy\\'
-file_chain_xy = path_dummy+'1D_voorland_chain_xy_10m.csv'
-file_shape = path_dummy+'1D_voorland_transect.shp'
+#file_chain_xy = path_dummy+'1D_voorland_chain_xy_10m.csv'
+file_shape = path_dummy+'1D_voorland_transect_obv_hydra.shp'
 
 #%% input data
 buffer = 200
