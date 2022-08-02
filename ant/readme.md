@@ -66,12 +66,18 @@ table_name = 'Calc_output'
 project_id = ant_funcs.get_project_id(ant_connection, project_name=project_name)
 table_id = ant_funcs.get_table_id(ant_connection, project_id, table_name)
 
+# make example file
+example_file = 'test.txt'
+with open(example_file, 'w') as file:
+    file.write('testing')
+
 # create a dict with a result. columns should have name of columns in output table
 result_dict = {'Name' : 'vanuit python',
                'Number' : 10,
                'Correct' : True,
                'Use in next step' : True,
-               'remarks' : None}
+               'remarks' : None,
+               'output_file' : ant_connection.parse_document(example_file)}
 ant_connection.record_create(project_id, table_id, result_dict)
 
 ```
