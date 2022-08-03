@@ -17,9 +17,9 @@ import ant_helper_functions as ant_funcs
 import file_handling
 
 # specify folder
-folder_to_index = r'/storage/KP_ZSS_download_from_STACK/Hydraulische databases met achtergrond informatie'
-root_folder_stack = r'/storage/KP_ZSS_download_from_STACK'
-stack_type = 'read-only'
+folder_to_index = r'o:\KP_ZSS_download_from_STACK\Werkmappen HKV en WiBo\07_data_ant\01_databases_IPM'
+root_folder_stack = r'o:\KP_ZSS_download_from_STACK\Werkmappen HKV en WiBo'
+stack_type = 'read-write'
 
 # specify where to put it
 project_name = 'Systeemanalyse Waterveiligheid'

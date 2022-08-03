@@ -6,6 +6,7 @@ Created on Fri Jul 22 12:07:07 2022
 """
 # import modules
 import os
+import numpy as np
 import antconnect
 from dotenv import load_dotenv
 
@@ -72,3 +73,41 @@ def get_table_id(ant, project_id, tableName):
             tableID = table['id']
             return tableID
     raise UserWarning('table "{tableName}" not found')
+
+def find_id(records, cols_to_search, items_to_find):
+    """
+    returns the id of the first entry that matches items_to_find in cols_to_find
+    
+    For example:
+        cols_to_search = ['Naam', 'Methode']
+        items_to_find  = ['Waddenzee', 'IPM']
+        
+        records = [{'id': 'df2985bd-7aa4-4bf6-b745-a50054e7e5ce',
+                     'Naam': 'Waddenzee',
+                     'Methode': 'IPM'},
+                    {'id': 'b228477c-c82b-459f-af89-407ff71f9a72',
+                     'Naam': 'Westerschelde',
+                     'Methode': 'IPM'},
+                    {'id': 'fc04022d-896b-41a5-b305-e70c8a1cd547',
+                     'Naam': 'Waddenzee',
+                     'Methode': 'Database'},
+                    {'id': '10958d59-f3dd-45f8-98c8-cce9c4a3dd2a',
+                     'Naam': 'Hollandse IJssel',
+                     'Methode': 'Database'},
+                    {'id': '5d4bb442-1934-4258-b6cd-8eb226a8c627',
+                     'Naam': 'Oosterschelde',
+                     'Methode': 'Database'}]
+        
+        This will return:
+            'df2985bd-7aa4-4bf6-b745-a50054e7e5ce'
+        
+    """
+    # loop over all records
+    for record in records:
+        # check if all cols match
+        if np.all([record[col]==item_to_find for col, item_to_find in zip(cols_to_search, items_to_find)]):
+            found_id = record['id']
+            return found_id
+    
+    raise UserWarning('Did not find the right record')
+    
