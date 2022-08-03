@@ -13,10 +13,10 @@ from hmtoolbox.WB_basic import replace_keywords
 
 # Settings
 
-dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_01',
+dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_02',
         'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\_bodem',
         'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\_rooster',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_01\input'}
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_02\input'}
 
 files = {'swan_templ':  'template.swn',
          'qsub_templ':  'dummy.qsub',
@@ -32,7 +32,7 @@ ppn = 4
 
 # Read scenario input
 
-xl_scen = pd.ExcelFile(os.path.join(dirs['input'],files['scen_xlsx']))
+xl_scen = pd.ExcelFile(os.path.join(dirs['input'],files['scen_xlsx']),engine='openpyxl')
 df_scen = xl_scen.parse()
 
 # Read Hydra-NL output
