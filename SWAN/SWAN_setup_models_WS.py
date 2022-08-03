@@ -19,6 +19,7 @@ dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerscheld
         'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_01\input'}
 
 files = {'swan_templ':  'template.swn',
+         'qsub_templ':  'dummy.qsub',
          'scen_xlsx':   'scenarios_SWAN_2D_WS_v01.xlsx',
          'hyd_output':  'hydra_output_WS_waves.csv',
          'grid':        'swan_grid_cart_4.grd',
@@ -26,8 +27,15 @@ files = {'swan_templ':  'template.swn',
          'HRext01':     'HRbasisPlus50m.pnt',
          'HRext02':     'HRextra.pnt'}
 
+node = 'despina'
+ppn = 4
+
+# Read scenario input
+
 xl_scen = pd.ExcelFile(os.path.join(dirs['input'],files['scen_xlsx']))
 df_scen = xl_scen.parse()
+
+# Read Hydra-NL output
 
 df_hyd  = pd.read_csv(os.path.join(dirs['input'],files['hyd_output']), sep=';',dtype={'ZSS-scenario':str})
 
@@ -49,6 +57,8 @@ for ss in range(len(df_scen)):
     # condition input
     is_scen =  df_hyd['ZSS-scenario']==df_scen.ZSS_scenario[ss]
     df_hyd_scen = df_hyd[is_scen]
+    
+    # Loop over scenario's
     
     for cc, row in df_hyd_scen.iterrows():
         wl          = df_hyd_scen['WL'][cc]
@@ -73,8 +83,9 @@ for ss in range(len(df_scen)):
         gamma       = df_hyd_scen['GAMMA'][cc]
         locid       = str(df_hyd_scen['OKADER VakId'][cc])
         conid       = "WS%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_s, tp_s, dirw_s)
-        runid       = locid + '_' + conid
+        runid       = 'ID' + locid + '_' + conid
         swan_out    = runid + '.swn'
+        qsub_out    = runid + '.qsub'
         
         #
         # CONSIDER skipping lines 54-73 and putting this directly into keyword_dict
@@ -120,3 +131,13 @@ for ss in range(len(df_scen)):
         replace_keywords.replace_keywords(os.path.join(dirs['input'], files['swan_templ']), 
                                           os.path.join(dir_run, swan_out), 
                                           keyword_dict, '<', '>')
+        
+        # make qsub files
+        
+        keyword_dict2 = {'NODE': node,
+                         'PPN': ppn,
+                         'RUNID': runid}
+        
+        replace_keywords.replace_keywords(os.path.join(dirs['input'], files['qsub_templ']), 
+                                          os.path.join(dir_run, qsub_out), 
+                                          keyword_dict2, '<', '>')
