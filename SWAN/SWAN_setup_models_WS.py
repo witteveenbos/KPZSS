@@ -9,14 +9,55 @@ Created on Thu Jul 28 15:35:37 2022
 
 import os
 import pandas as pd
+from scipy import interpolate
+import numpy as np
 from hmtoolbox.WB_basic import replace_keywords
+
+def interp_offshore_waves(df_offshore, windrichting, windsnelheid):
+    '''
+    function to obtain offshore waves
+    using both interpolation and extrapolation
+
+    Parameters
+    ----------
+    df_offshore : TYPE
+        DESCRIPTION.
+    windrichting : TYPE
+        DESCRIPTION.
+    windsnelheid : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    Hs : interpolated or extrapolated wave height
+    Tp : interpolated or extrapolated wave period
+
+    '''
+    # select directions
+    df_golfrand_richting_selected = df_golfrand[df_golfrand['Windrichting'] == windrichting].reset_index()
+
+    # perform interpolation and allow for extrapolation
+    Hs = interpolate.interp1d(df_golfrand_richting_selected['Windsnelheid'].values, 
+               df_golfrand_richting_selected['Golfhoogte'].values,fill_value='extrapolate')(windsnelheid)
+    
+    Tp = interpolate.interp1d(df_golfrand_richting_selected['Windsnelheid'].values, 
+               df_golfrand_richting_selected['Golfperiode Tp'].values,fill_value='extrapolate')(windsnelheid)
+    
+    # print some data
+    if test_snelheid > np.max(df_golfrand_richting_selected['Windsnelheid'].values):
+        print(f'we extrapolated the windsnelheid of {windsnelheid:.2f} with richting of {windrichting:.2f}, resulting Hs {Hs:.2f} m and Tp {Tp:.2f} s')
+    else:
+        print(f'we interpolated the windsnelheid of {windsnelheid:.2f} with richting of {windrichting:.2f}, resulting Hs {Hs:.2f} m and Tp {Tp:.2f} s')
+
+    return float(Hs), float(Tp)
 
 # Settings
 
 dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_02',
         'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\_bodem',
         'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\_rooster',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_02\input'}
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_02\input',
+        'golfrand': r'z:\130991_Systeemanalyse_ZSS\2.Data\dummy\randvoorwaarden'}
 
 files = {'swan_templ':  'template.swn',
          'qsub_templ':  'dummy.qsub',
@@ -25,7 +66,8 @@ files = {'swan_templ':  'template.swn',
          'grid':        'swan_grid_cart_4.grd',
          'HRbasis':     'HRbasis.pnt',
          'HRext01':     'HRbasisPlus50m.pnt',
-         'HRext02':     'HRextra.pnt'}
+         'HRext02':     'HRextra.pnt',
+         'diepwaterrandvoorwaarden': 'HKV2010_diepwaterrandvoorwaarden.xlsx'}
 
 node = 'despina'
 ppn = 4
@@ -38,6 +80,16 @@ df_scen = xl_scen.parse()
 # Read Hydra-NL output
 
 df_hyd  = pd.read_csv(os.path.join(dirs['input'],files['hyd_output']), sep=';',dtype={'ZSS-scenario':str})
+
+# Read diepwaterrandvoorwaarden
+
+xl_golfrand = pd.ExcelFile(os.path.join(dirs['golfrand'],files['diepwaterrandvoorwaarden']),engine='openpyxl')
+df_golfrand = xl_golfrand.parse(sheet_name = 'SCW',skiprows=1).drop([0,1])
+
+test_richting = 300
+test_snelheid = 40
+
+Hs_offshore, Tp_offshore = interp_offshore_waves(df_golfrand, test_richting, test_snelheid)
 
 # loop over scenario's
 
