@@ -115,23 +115,28 @@ for ss in range(len(df_scen)):
         # determine offshore wave boundary
         Hs_offshore, Tp_offshore = interp_offshore_waves(df_golfrand, wd, ws)
         
-        hs_zn       = df_hyd_scen['HS_ZN'][cc]
-        tp_zn       = df_hyd_scen['TP_ZN'][cc]
-        dirw_zn     = df_hyd_scen['DIR_ZN'][cc]
-        dspr_zn     = df_hyd_scen['DSPR_ZN'][cc]
-        hs_d        = df_hyd_scen['HS_D'][cc]
-        tp_d        = df_hyd_scen['TP_D'][cc]
-        dirw_d      = df_hyd_scen['DIR_D'][cc]
-        dspr_d      = df_hyd_scen['DSPR_D'][cc]
-        hs_s        = df_hyd_scen['HS_S'][cc]
-        tp_s        = df_hyd_scen['TP_S'][cc]
-        dirw_s      = df_hyd_scen['DIR_S'][cc]
-        dspr_s      = df_hyd_scen['DSPR_S'][cc]
-        hs_zs       = df_hyd_scen['HS_ZS'][cc]
-        tp_zs       = df_hyd_scen['TP_ZS'][cc]
-        dirw_zs     = df_hyd_scen['DIR_ZS'][cc]
-        dspr_zs     = df_hyd_scen['DSPR_ZS'][cc]
-        gamma       = df_hyd_scen['GAMMA'][cc]
+        hs_zn       = 0 # zero boundary
+        tp_zn       = 0 # zero boundary
+        dirw_zn     = 0 # zero boundary
+        dspr_zn     = 0 # zero boundary
+        
+        hs_d        = Hs_offshore # obtained using linear interpolation on offshore diepwaterrandvoorwaarden
+        tp_d        = Tp_offshore # obtained using linear interpolation on offshore diepwaterrandvoorwaarden
+        dirw_d      = ws # assumption same as wind direction
+        dspr_d      = 30 # default
+        
+        hs_s        = Hs_offshore # obtained using linear interpolation on offshore diepwaterrandvoorwaarden
+        tp_s        = Tp_offshore # obtained using linear interpolation on offshore diepwaterrandvoorwaarden
+        dirw_s      = ws # assumption same as wind direction
+        dspr_s      = 30 # default
+        
+        hs_zs       = 0 # zero boundary
+        tp_zs       = 0 # zero boundary
+        dirw_zs     = 0 # zero boundary
+        dspr_zs     = 0 # zero boundary
+        
+        gamma       = 3.3 # default for all boundary conditions
+        
         locid       = str(df_hyd_scen['OKADER VakId'][cc])
         conid       = "WS%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_s, tp_s, dirw_s)
         runid       = 'ID' + locid + '_' + conid
