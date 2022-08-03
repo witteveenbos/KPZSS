@@ -86,11 +86,6 @@ df_hyd  = pd.read_csv(os.path.join(dirs['input'],files['hyd_output']), sep=';',d
 xl_golfrand = pd.ExcelFile(os.path.join(dirs['golfrand'],files['diepwaterrandvoorwaarden']),engine='openpyxl')
 df_golfrand = xl_golfrand.parse(sheet_name = 'SCW',skiprows=1).drop([0,1])
 
-test_richting = 300
-test_snelheid = 40
-
-Hs_offshore, Tp_offshore = interp_offshore_waves(df_golfrand, test_richting, test_snelheid)
-
 # loop over scenario's
 
 for ss in range(len(df_scen)):
@@ -116,6 +111,10 @@ for ss in range(len(df_scen)):
         wl          = df_hyd_scen['WL'][cc]
         ws          = df_hyd_scen['WS'][cc]
         wd          = df_hyd_scen['WD'][cc]
+        
+        # determine offshore wave boundary
+        Hs_offshore, Tp_offshore = interp_offshore_waves(df_golfrand, wd, ws)
+        
         hs_zn       = df_hyd_scen['HS_ZN'][cc]
         tp_zn       = df_hyd_scen['TP_ZN'][cc]
         dirw_zn     = df_hyd_scen['DIR_ZN'][cc]
