@@ -17,7 +17,7 @@ hydra_results = {
     'OKADER VakId':[], 
     'Uitvoerbestand':[], 
     'Terugkeertijd':[], 
-    'q [m3/s/m]':[], 
+    'qs [m3/s/m]':[], 
     'ZSS-scenario':[], 
     'HYD_location_name':[], 
     'HYD_location_X':[], 
