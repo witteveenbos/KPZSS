@@ -17,6 +17,9 @@ files = list_files_folders.list_files('uitvoer.txt',path)
 
 for file in files:
     
+    scene = file.split('\\')[-3]
+    simulation = file.split('\\')[-2]
+    
     data, headers = SWAN_read_tab.Freadtab(file)
     
     data['Hsig'][data['Hsig']<=0] = np.nan
@@ -30,26 +33,27 @@ for file in files:
     ax1.plot(data['Xp'],data['Botlev'],'k',label = 'bathymetrie')
     ax1.plot(data['Xp'], data['Watlev'], 'b--', label = 'waterstand')
     ax1.set_ylabel('hoogte [m+NAP]')
-    
+    ax1.set_xlabel('afstand [m]')
+
     ax1_copy.plot(data['Xp'], data['Hsig'],'g')#, label = '$H_s$ [m]')
     ax1_copy.set_ylabel('$H_s$ [m]',color='g')
     ax1_copy.tick_params(labelcolor='g')
-    plt.xlabel('afstand [m]')
     #plt.legend()
-    plt.title(file.split('\\')[-2])
+    plt.title(f'{scene}\n{simulation}')
     
     ax2 = plt.subplot(2,1,2)
     ax2_copy = ax2.twinx()
     ax2.plot(data['Xp'],data['Botlev'],'k',label = 'bathymetrie')
     ax2.plot(data['Xp'], data['Watlev'], 'b--', label = 'waterstand')
     ax2.set_ylabel('hoogte [m+NAP]')
-    
+    ax2.set_xlabel('afstand [m]')
+
     ax2_copy.plot(data['Xp'], data['Tm_10'],color='orange')
     ax2_copy.set_ylabel('$H_s$ [m]',color='orange')
     ax2_copy.tick_params(labelcolor='orange')
     ax2_copy.set_ylabel('$T_{m-1,0}$ [s]')
 
-    save_name = output_path+file.split('\\')[-2]
-    save_plot.save_plot(fig,save_name)
+    save_name = output_path+scene+'_'+simulation
+    save_plot.save_plot(fig,save_name,ax = ax1_copy, dx = -0.05)
 
 

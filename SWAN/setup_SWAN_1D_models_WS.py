@@ -13,13 +13,13 @@ from hmtoolbox.WB_basic import replace_keywords
 
 # Settings
 
-dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\tests\test_02',
+dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\tests\test_03',
         'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\tests\_bodem',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\tests\test_02\input'}
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\tests\test_03\input'}
 
 files = {'swan_templ':  '1D_swanfile_template.swn',
          'qsub_templ':  'dummy.qsub',
-         'scen_xlsx':   'scenarios_SWAN_1D_WS_v01.xlsx',
+         'scen_xlsx':   'scenarios_SWAN_1D_WS_v03.xlsx',
          'hyd_output':  'SWAN2D_output_WS.csv'}
 
 node = 'triton'
@@ -50,6 +50,8 @@ for ss in range(len(df_scen)):
     
     # condition input
     is_scen =  df_hyd['ZSS-scenario']==df_scen.ZSS_scenario[ss]
+    print(df_scen.ZSS_scenario[ss])
+    print(is_scen)
     df_hyd_scen = df_hyd[is_scen]
     
     # Loop over scenario's
