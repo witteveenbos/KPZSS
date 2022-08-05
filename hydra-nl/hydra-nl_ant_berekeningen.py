@@ -80,8 +80,10 @@ base_folder = r"C:\MyPrograms\Hydra-NL_KP_ZSS\werkmap"
 # create a dict with a result. columns should have name of columns in output table
 
 for i in range(len(hydra_output)):
+    zichtjaar, zss = zss_scenario(hydra_output['ZSS-scenario'].loc[i])    
+    
+    if Path(hydra_output['Uitvoerbestand'].loc[i]).exists():
 
-    zichtjaar, zss = zss_scenario(hydra_output['ZSS-scenario'].loc[i])
     # freq_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\ffq.txt')
     # invoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\invoer.hyd')
     # uitvoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.html')
@@ -89,67 +91,70 @@ for i in range(len(hydra_output)):
     # print((hydra_output['Uitvoerbestand'].loc[i].split('\\')[-5] + '.zip'))
     # print(str(hydra_output['OKADER VakId'].loc[i]))
    
-    if 'Waddenzee' in hydra_output['Uitvoerbestand'].loc[i]:
-        if Path(hydra_output['Uitvoerbestand'].loc[i]).exists():
-            string_to_match = ['_KW', '_WS']
+        if 'Waddenzee' in hydra_output['Uitvoerbestand'].loc[i]:
+            
+                string_to_match = ['_KW', '_WS']
 
-            for substring in string_to_match:
-                if not substring in hydra_output['Uitvoerbestand'].loc[i].split('\\')[-1]:
-                    freq_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\ffq.txt')
-                    invoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\invoer.hyd')
-                    uitvoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.html')
-                    log_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.log')               
-                    
+                # for substring in string_to_match:
+                #     if not substring in hydra_output['Uitvoerbestand'].loc[i].split('\\')[-1]:
+                if not any(x in hydra_output['Uitvoerbestand'].loc[i].split('\\')[-1] for x in string_to_match):
+                        freq_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\ffq.txt')
+                        invoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\invoer.hyd')
+                        uitvoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.html')
+                        log_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.log')               
 
-                    result_dict = {
-                            'Naam'  : hydra_output['Uitvoerbestand'].loc[i].split('\\')[-2],
-                            'Vak_id'  : ant_funcs.find_id(vakken_records, ['HRD_locatie_id', 'OKADER_vak_id'], [hydra_output['HYD_location_name'].loc[i], str(hydra_output['OKADER VakId'].loc[i])]),
-                            'HR_database_id' : ant_funcs.find_id(DBM_HR_database_records, ['STACK_file_ID'], [ant_funcs.find_id(STACK_records, ['filename'], [(hydra_output['Uitvoerbestand'].loc[i].split('\\')[-5] + '.zip')])]),
-                            'Zeespiegelstijging_CM'  : float(zss),
-                            # 'Afvoerstatistiek'  : ant_connection.parse_document(afvoerstatistiek, 'test.txt'),
-                            'Type berekening'  : 'HBN',
-                            'Basis of Gevoeligheid'  : 'Basis',
-                            'Zichtjaar'  :  zichtjaar,
-                            'Bijzonderheden'  : 'n.v.t.',
-                            'freq_file'  : ant_connection.parse_document(freq_file, 'ffq.txt'),
-                            'Invoer_file'  : ant_connection.parse_document(invoer_file, 'invoer.hyd'),
-                            'Uitvoer_file'  : ant_connection.parse_document(uitvoer_file, 'uitvoer.html'), 
-                            'Log_file'  : ant_connection.parse_document(log_file, 'uitvoer.log'),
-                            'Goedgekeurd'  :  False,
-                            'Opmerkingen'  : '-'}
 
-                    ant_connection.record_create(project_id, table_id, result_dict)
+                        result_dict = {
+                                'Naam'  : hydra_output['Uitvoerbestand'].loc[i].split('\\')[-2],
+                                'Vak_id'  : ant_funcs.find_id(vakken_records, ['HRD_locatie_id', 'OKADER_vak_id'], [hydra_output['HYD_location_name'].loc[i], str(hydra_output['OKADER VakId'].loc[i])]),
+                                'HR_database_id' : ant_funcs.find_id(DBM_HR_database_records, ['STACK_file_ID'], [ant_funcs.find_id(STACK_records, ['filename'], [(hydra_output['Uitvoerbestand'].loc[i].split('\\')[-5] + '.zip')])]),
+                                'Zeespiegelstijging_CM'  : float(zss),
+                                # 'Afvoerstatistiek'  : ant_connection.parse_document(afvoerstatistiek, 'test.txt'),
+                                'Type berekening'  : 'HBN',
+                                'Basis of Gevoeligheid'  : 'Basis',
+                                'Zichtjaar'  :  zichtjaar,
+                                'Bijzonderheden'  : 'n.v.t.',
+                                'freq_file'  : ant_connection.parse_document(freq_file, 'ffq.txt'),
+                                'Invoer_file'  : ant_connection.parse_document(invoer_file, 'invoer.hyd'),
+                                'Uitvoer_file'  : ant_connection.parse_document(uitvoer_file, 'uitvoer.html'), 
+                                'Log_file'  : ant_connection.parse_document(log_file, 'uitvoer.log'),
+                                'Goedgekeurd'  :  False,
+                                'Opmerkingen'  : '-'}
 
-    elif 'Westerschelde' in hydra_output['Uitvoerbestand'].loc[i]:
-        if Path(hydra_output['Uitvoerbestand'].loc[i]).exists():
-            for substring in string_to_match:
-                if not substring in hydra_output['Uitvoerbestand'].loc[i].split('\\')[-1]:
+                        ant_connection.record_create(project_id, table_id, result_dict)
 
-                    freq_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\ffq.txt')
-                    invoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\invoer.hyd')
-                    uitvoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.html')
-                    log_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.log')    
+        elif 'Westerschelde' in hydra_output['Uitvoerbestand'].loc[i]:
+                # for substring in string_to_match:
+                #     if not substring in hydra_output['Uitvoerbestand'].loc[i].split('\\')[-1]:
+                if not any(x in hydra_output['Uitvoerbestand'].loc[i].split('\\')[-1] for x in string_to_match):
 
-                    result_dict = {
-                            'Naam'  : hydra_output['Uitvoerbestand'].loc[i].split('\\')[-2],
-                            'Vak_id'  : ant_funcs.find_id(vakken_records, ['HRD_locatie_id', 'OKADER_vak_id'], [hydra_output['HYD_location_name'].loc[i], str(hydra_output['OKADER VakId'].loc[i])]),
-                            'HR_database_id' : ant_funcs.find_id(DBM_HR_database_records, ['STACK_file_ID'], [ant_funcs.find_id(STACK_records, ['filename'], [(hydra_output['Uitvoerbestand'].loc[i].split('\\')[-5] + '.zip')])]),
-                            'Zeespiegelstijging_CM'  : float(zss),
-                            # 'Afvoerstatistiek'  : ant_connection.parse_document(afvoerstatistiek, 'test.txt'),
-                            'Type berekening'  : 'HBN',
-                            'Basis of Gevoeligheid'  : 'Basis',
-                            'Zichtjaar'  :  zichtjaar,
-                            'Bijzonderheden'  : 'n.v.t.',
-                            'freq_file'  : ant_connection.parse_document(freq_file, 'ffq.txt'),
-                            'Invoer_file'  : ant_connection.parse_document(invoer_file, 'invoer.hyd'),
-                            'Uitvoer_file'  : ant_connection.parse_document(uitvoer_file, 'uitvoer.html'), 
-                            'Log_file'  : ant_connection.parse_document(log_file, 'uitvoer.log'),
-                            'Goedgekeurd'  :  False,
-                            'Opmerkingen'  : '-'}
+                        freq_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\ffq.txt')
+                        invoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\invoer.hyd')
+                        uitvoer_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.html')
+                        log_file = os.path.join(os.path.dirname(hydra_output['Uitvoerbestand'].loc[i]) + '\\uitvoer.log')    
 
-                    ant_connection.record_create(project_id, table_id, result_dict)
+
+                        result_dict = {
+                                'Naam'  : hydra_output['Uitvoerbestand'].loc[i].split('\\')[-2],
+                                'Vak_id'  : ant_funcs.find_id(vakken_records, ['HRD_locatie_id', 'OKADER_vak_id'], [hydra_output['HYD_location_name'].loc[i], str(hydra_output['OKADER VakId'].loc[i])]),
+                                'HR_database_id' : ant_funcs.find_id(DBM_HR_database_records, ['STACK_file_ID'], [ant_funcs.find_id(STACK_records, ['filename'], [(hydra_output['Uitvoerbestand'].loc[i].split('\\')[-5] + '.zip')])]),
+                                'Zeespiegelstijging_CM'  : float(zss),
+                                # 'Afvoerstatistiek'  : ant_connection.parse_document(afvoerstatistiek, 'test.txt'),
+                                'Type berekening'  : 'HBN',
+                                'Basis of Gevoeligheid'  : 'Basis',
+                                'Zichtjaar'  :  zichtjaar,
+                                'Bijzonderheden'  : 'n.v.t.',
+                                'freq_file'  : ant_connection.parse_document(freq_file, 'ffq.txt'),
+                                'Invoer_file'  : ant_connection.parse_document(invoer_file, 'invoer.hyd'),
+                                'Uitvoer_file'  : ant_connection.parse_document(uitvoer_file, 'uitvoer.html'), 
+                                'Log_file'  : ant_connection.parse_document(log_file, 'uitvoer.log'),
+                                'Goedgekeurd'  :  False,
+                                'Opmerkingen'  : '-'}
+
+                        ant_connection.record_create(project_id, table_id, result_dict)
 
     #toevoegen elif voor Hollandse Kust
 
     print('Record', i+1, 'toegevoegd')
+
 
