@@ -27,7 +27,7 @@ region_records = ant_connection.records_read(project_id, region_table_id)
 
 # import needed files
 okader_norm_csv = pd.read_csv(r"D:\Users\BADD\Desktop\KP ZSS\kust\koppelingen\Vakken_OKADER_norm_csv_v2.csv")
-df_hydra_definition = pd.read_csv(r"D:\Users\BADD\Desktop\KP ZSS\kust\koppelingen\OKADER_FC_Hydra_attributes_filtered.csv")
+df_hydra_definition = pd.read_csv(r"D:\Users\BADD\Desktop\KP ZSS\kust\koppelingen\OKADER_FC_Hydra_attributes.csv")
 hydra_output = pd.read_csv(r"D:\Users\BADD\Desktop\KP ZSS\kust\output\HBN\hydra_output_totaal.csv", delimiter=';')
 
 hyd_location_shp = gpd.read_file(r'D:\Users\BADD\Desktop\KP ZSS\GIS\uitvoerpunten_hydra-nl\HRD_locations_hydra.shp')
@@ -39,6 +39,7 @@ for i in range(len(df_hydra_definition)):
 
     # get profile file, profile files are based on VakId
     profile_file = 'D:\\Users\\BADD\\Desktop\\KP ZSS\\kust\\profielen\\' + str(df_hydra_definition['VakId'].loc[i]) + '.prfl'
+
 
     # get returnperiod for specific okader-vak
     for j in range(len(okader_norm_shp)):
