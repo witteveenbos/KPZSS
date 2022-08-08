@@ -12,6 +12,7 @@ from the berekeningen. It follows these steps:
 """
 # import python modules
 import os
+import numpy as np
 
 # import ant functions
 from ant import ant_helper_functions as ant_funcs
@@ -96,8 +97,9 @@ for calc_record in records_berekeningen:
     
     # check if this results in 2 illustratiepunten
     if sum(ip.index == vak['Norm_frequentie']) > 1:
-        # in that case, we just need the first
-        rel_ip = ip.loc[vak['Norm_frequentie']].iloc[0]
+        # in that case, we just need the one with the heighest water level
+        rel_ip = ip.loc[vak['Norm_frequentie']]
+        rel_ip = rel_ip.iloc[np.argmax(rel_ip['h,teen m+NAP'])]
     # if not, we can just get the first one
     else:
         # get the relevant ip
