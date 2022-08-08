@@ -74,9 +74,11 @@ def get_table_id(ant, project_id, tableName):
             return tableID
     raise UserWarning('table "{tableName}" not found')
 
-def find_id(records, cols_to_search, items_to_find):
+def find_id_or_record(records, cols_to_search, items_to_find, find_id=True):
     """
-    returns the id of the first entry that matches items_to_find in cols_to_find
+    returns the id or record of the first entry that matches items_to_find in cols_to_find
+    
+    if find_id=True, it returns the id, otherwise the record
     
     For example:
         cols_to_search = ['Naam', 'Methode']
@@ -106,8 +108,13 @@ def find_id(records, cols_to_search, items_to_find):
     for record in records:
         # check if all cols match
         if np.all([record[col]==item_to_find for col, item_to_find in zip(cols_to_search, items_to_find)]):
-            found_id = record['id']
-            return found_id
+            if find_id:
+                found_id = record['id']
+                return found_id
+            else:
+                return record
     
     raise UserWarning('Did not find the right record')
+    
+
     

@@ -1,3 +1,5 @@
 antconnect
 numpy
+pandas
 python-dotenv
+html2text
