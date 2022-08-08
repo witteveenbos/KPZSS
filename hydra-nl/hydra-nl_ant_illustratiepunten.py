@@ -92,21 +92,33 @@ for calc_record in records_berekeningen:
 
     tekst = lees_uitvoerhtml(location_uitvoer)
     cips, ip = lees_illustratiepunten(tekst)
-    ofl = lees_ofl(tekst)
+    ofl = lees_ofl(tekst)  
+    
+    # check if this results in 2 illustratiepunten
+    if sum(ip.index == vak['Norm_frequentie']) > 1:
+        # in that case, we just need the first
+        rel_ip = ip.loc[vak['Norm_frequentie']].iloc[0]
+    # if not, we can just get the first one
+    else:
+        # get the relevant ip
+        rel_ip = ip.loc[vak['Norm_frequentie']]
     
     # make dict to make record later    
     illustratiepunten_dict = {'HRD_berekening_id': calc_record['id'],
                               'HBN_referentie': ofl['hoogte'].loc[vak['Norm_frequentie']],
-                              'Waterstand': ip['h,teen m+NAP'].loc[vak['Norm_frequentie']],
-                              'Windsnelheid': ip['windsn. m/s'].loc[vak['Norm_frequentie']],
-                              'Windrichting': ip['r'].loc[vak['Norm_frequentie']],
-                              'Hm0_lokaal': ip['Hm0,teen m'].loc[vak['Norm_frequentie']],
-                              'Tm-1,0_lokaal': ip['Tm-1,0,t s'].loc[vak['Norm_frequentie']],
-                              'Golfrichting_lokaal': ip['golfr graden'].loc[vak['Norm_frequentie']],
-                              'Bijdrage_overschrijdingsfrequentie': ip['bijdrage ov. freq (%)'].loc[vak['Norm_frequentie']],
+                              'Waterstand': rel_ip['h,teen m+NAP'],
+                              'Windsnelheid': rel_ip['windsn. m/s'],
+                              'Windrichting': rel_ip['r'],
+                              'Hm0_lokaal': rel_ip['Hm0,teen m'],
+                              'Tm-1,0_lokaal': rel_ip['Tm-1,0,t s'],
+                              'Golfrichting_lokaal': rel_ip['golfr graden'],
+                              'Bijdrage_overschrijdingsfrequentie': rel_ip['bijdrage ov. freq (%)'],
                               'Berm_aanwezig': True}
     
     ant_connection.record_create(project_id, table_id_illustratiepunten, illustratiepunten_dict)
     
     # remove output, just for sanity
     os.remove(location_uitvoer)
+
+# remove temp folder as well
+os.remove(temp_folder)
