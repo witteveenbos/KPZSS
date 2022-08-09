@@ -85,3 +85,7 @@ ant_connection.record_create(project_id, table_id, result_dict)
 ## Working with sessions
 
 **Better description should be added**, for now, see [demo in this file]([../example/demo_upload.py](https://github.com/witteveenbos/KPZSS/blob/main/example/demo_upload.py))
+
+## Used datamodel
+
+![image](https://user-images.githubusercontent.com/68229914/183667963-a00443c5-c309-4e59-aa1e-8a1a46de903c.png)
