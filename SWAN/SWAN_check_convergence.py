@@ -6,6 +6,7 @@ Created on Fri Jul 22 08:57:36 2022
 """
 
 # import
+
 import os
 import matplotlib.pyplot as plt 
 from hmtoolbox import WB_basic 
@@ -15,29 +16,31 @@ from hmtoolbox.WB_SWAN import SWAN_check_convergence
 
 # settings
 
-path_model = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_02\WS_VT_06_300_A2'
-dirs = list_files_folders.list_folders(path_model, dir_incl='ID')
+path_main   = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_03'
+dirs        = list_files_folders.list_folders(path_main, dir_incl='WS', startswith = True, endswith = False)
 
 # check convergence
+
 save_fig = True
 
-ix = 0
 for diri in dirs:
-    file = list_files_folders.list_files('.prt-001',diri,endswith=True)
-    iteration_list, convergence_list = SWAN_check_convergence.check_swan_convergence(file[0])
-    if max(convergence_list,default=0)<101:
-        print('Max convergence = '+str(max(convergence_list,default=0))+ '%, plotted. \n'+file[0])
-        fig = plt.figure()
-        plt.plot(iteration_list,convergence_list)
-        plt.text(2,convergence_list[-1],"max. convergence = %.2f%%" % convergence_list[-1])
-        plt.xlabel('Iteration [nr.]')
-        plt.ylabel('Convergence [%]')
-        plt.title('SWAN convergence G1 model WZ test_01')
-        if save_fig:
-            savename = os.path.join(path_model, 'figures', os.path.basename(os.path.normpath(dirs[ix])) + '_convergence_prt-001.png')
-            save_plot.save_plot(fig, savename, incl_wibo = False, dpi = 300, 
-                          change_size = False, figwidth = 8, figheight = 6)
-        ix = ix + 1
-    else:
-        print('Convergence > 101%, not plotted. \n'+file[0])
+    subdirs = list_files_folders.list_folders(diri, dir_incl='ID')
+    for subdiri in subdirs:
+        file = list_files_folders.list_files('.prt-001',subdiri,endswith=True)
+        iteration_list, convergence_list = SWAN_check_convergence.check_swan_convergence(file[0])
+        if max(convergence_list,default=0)<101:
+            print('Max convergence = '+str(max(convergence_list,default=0))+ '%, plotted. \n'+file[0])
+            fig = plt.figure()
+            plt.plot(iteration_list,convergence_list)
+            plt.text(2,convergence_list[-1],"max. convergence = %.2f%%" % convergence_list[-1])
+            plt.xlabel('Iteration [nr.]')
+            plt.ylabel('Convergence [%]')
+            plt.title('SWAN convergence WS')
+            if save_fig:
+                savename = os.path.join(diri, 'figures', os.path.basename(os.path.normpath(subdiri) + '_convergence_prt-001.png'))
+                save_plot.save_plot(fig, savename, incl_wibo = False, dpi = 300, 
+                              change_size = False, figwidth = 8, figheight = 6)
+                plt.close()
+            else:
+                print('Convergence > 101%, not plotted. \n'+file[0])
 
