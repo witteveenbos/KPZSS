@@ -100,19 +100,22 @@ def overtopping(Hm0, Tm, slope, Rc, **kwargs):
     valid_ind = rc_pos & (Hm0 > 0) & (Tm > 0)
 
     # Fix betaw to be between 0 and 180, and derive gamma beta
-    betaw = np.abs(betaw)
-    betaw[betaw > 180] = 360 - betaw[betaw > 180]
+    if betaw > 180:
+        betaw = 360-betaw
+
     ybeta = np.ones(Hm0.shape) * 0.736
-    ybeta[betaw <= 80] = 1.0 - 0.0033 * betaw[betaw <= 80] # still valid in 2016, Eq. 5.29
+    
+    if betaw <= 80:
+        ybeta = 1.0 - 0.0033 * betaw # still valid in 2016, Eq. 5.29
 
     # Zero overtopping discharge for waves not attacking the profile
     q[valid_ind & (betaw > 110)] = 0.0
     valid_ind = valid_ind & (betaw <= 110)
 
     # Reduce wave height and periods for very oblique waves
-    wave_red = valid_ind & (betaw > 80)
-    Hm0[wave_red] = Hm0[wave_red] * (110.0 - betaw[wave_red]) / 30.0
-    Tm[wave_red]  = Tm[wave_red] * np.sqrt((110.0 - betaw[wave_red]) / 30.0)
+    if valid_ind & (betaw > 80):
+        Hm0 = Hm0 * (110.0 - betaw) / 30.0
+        Tm  = Tm * np.sqrt((110.0 - betaw) / 30.0)
 
     # Reduce variables to the valid indices, makes the calculations for
     # q1, q2 and q3 more readable
@@ -120,10 +123,10 @@ def overtopping(Hm0, Tm, slope, Rc, **kwargs):
     Tm = Tm[valid_ind]
     Rc = Rc[valid_ind]
     slope = slope[valid_ind]
-    ybeta = ybeta[valid_ind]
-    yb = yb[valid_ind]
-    yf = yf[valid_ind]
-    yv = yv[valid_ind]
+    ybeta = ybeta
+    yb = yb
+    yf = yf
+    yv = yv
 
     # Calculate L0, sm and zeta
     L0    = g * Tm**2 / 2.0 / np.pi
@@ -151,3 +154,21 @@ def overtopping(Hm0, Tm, slope, Rc, **kwargs):
     q[zeta_between] = (zeta[zeta_between] - 5.0) / (7.0 - 5.0) * (q3[zeta_between] - lb) + lb
 
     return q
+
+if __name__ == '__main__':  
+    # fill in function which corresponds to results of JORL2
+    Hm0 = 4.07 # m
+    Tm = 8.11 # s Tm-1,0 (s)
+    slope = 0.25 # mTAW
+    Rc = 1.09
+    betaw = 0.0
+    
+    yb = 0.8
+    yf = 0.9
+    yv = 0.7
+    
+    q = overtopping(np.array(Hm0),np.array(Tm),np.array(slope),np.array(Rc), 
+                    betaw = betaw, yf = yf, yb = yb, yv = yv, 
+                    ed = 2007, ctype = 'det')
+
+    print(q*1000) # result JORL2 sheet = 561.2 l/s/m
