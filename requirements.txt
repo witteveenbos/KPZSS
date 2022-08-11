@@ -1,3 +1,4 @@
 antconnect
 numpy
 python-dotenv
+pathlib
