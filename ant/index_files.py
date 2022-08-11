@@ -17,9 +17,9 @@ import ant_helper_functions as ant_funcs
 import file_handling
 
 # specify folder
-folder_to_index = r'd:\Users\VERA7\Downloads\KP_ZSS_download_from_STACK\SWAN\Bodems\WS'
-root_folder_stack = r'd:\Users\VERA7\Downloads\KP_ZSS_download_from_STACK'
-stack_type = 'read-only'
+folder_to_index = r'o:\KP_ZSS_download_from_STACK\Werkmappen HKV en WiBo\07_data_ant\02_SWAN_2D_deps'
+root_folder_stack = r'o:\KP_ZSS_download_from_STACK\Werkmappen HKV en WiBo'
+stack_type = 'read-write'
 
 # specify where to put it
 project_name = 'Systeemanalyse Waterveiligheid'
@@ -33,15 +33,11 @@ project_id = ant_funcs.get_project_id(ant_connection, project_name=project_name)
 table_id = ant_funcs.get_table_id(ant_connection, project_id, table_name)
 
 # get all the files
-filelist = list_files_folders.list_files('.mat', folder_to_index, endswith=True)
+filelist = list_files_folders.list_files('.bot', folder_to_index, endswith=True)
 
 # %%
 # loop over all files, get relevant information and push to ant
 for file in filelist:
-    if 'notfilled' in os.path.basename(file) or \
-       'base_bathy_Westerschelde' in os.path.dirname(file) or \
-        os.path.basename(file).endswith('_5.mat'):
-        continue
     
     print(f'starting on {file}')
     fingerprint = file_handling.get_fingerprint_from_file(file)
