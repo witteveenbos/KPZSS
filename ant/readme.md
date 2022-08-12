@@ -81,6 +81,38 @@ result_dict = {'Name' : 'vanuit python',
 ant_connection.record_create(project_id, table_id, result_dict)
 
 ```
+## Update records in a table
+
+You can update specific fields of a record with `records.update`. Note you need to supply the changing fields only, see example below.
+
+```python
+# import own modules
+from ant import ant_helper_functions as ant_funcs
+
+# %% set some variables
+project_name = 'Systeemanalyse Waterveiligheid'
+output_table = 'Calc_output'
+
+# make api connection
+ant_connection = ant_funcs.get_api_connection()
+
+# get ids required to do the analysis
+project_id = ant_funcs.get_project_id(ant_connection, project_name=project_name)
+table_id = ant_funcs.get_table_id(ant_connection, project_id, output_table)
+
+
+# read records and find one to update
+records = ant_connection.records_read(project_id, table_id)
+
+found_ids, found_records = ant_funcs.find_ids_or_records(records, ['Number'], [11], return_records=True)
+
+for found_record in found_records:
+    # set new number
+    newdict = {'Number' : found_record['Number'] + 1} 
+    
+    ant_connection.record_update(project_id, table_id, found_record['id'], 
+                                 newdict)
+```
 
 ## Working with sessions
 
