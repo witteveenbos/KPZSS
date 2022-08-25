@@ -10,10 +10,12 @@ script to generate 1D profiles for SWAN 1D simulations based on .mat files
 
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.io
+import os
 
 import geopandas as gpd
 import pandas as pd
-import mat73
+# import mat73
 
 from hmtoolbox.WB_topo import interpolate, geometry_funcs
 from hmtoolbox.WB_basic import save_plot
@@ -31,7 +33,7 @@ if gebied == 'WS':
                   'WS_VM_B3' : base_path+'B - meegroeien\\WS-25m_2.mat',
                   'WS_VM_B4' : base_path+'B - meegroeien\\WS-25m_3.mat'}
     
-    save_path = 'z:\\130991_Systeemanalyse_ZSS\\3.Models\\SWAN\\1D\\Westerschelde\\tests\\_bodem\\'
+    save_path = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\tests\_bodem'
     
 elif gebied == 'WZ':
     base_path = 'z:\\130991_Systeemanalyse_ZSS\\2.Data\\bathy\\ontvangen\\WZ\\'
@@ -50,15 +52,26 @@ elif gebied == 'WZ':
 else:
     raise UserWarning(f'{gebied} does not exist')
     
-path_dummy = 'z:\\130991_Systeemanalyse_ZSS\\2.Data\\dummy\\'
-file_shape = path_dummy+'1D_voorland_transect_WS.shp'
+path_dummy = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\tests\_profielen'
+file_shape = path_dummy+'\ill_pilot_v02_profielen_02.shp'
+# path_dummy = r'z:\130991_Systeemanalyse_ZSS\2.Data\dummy'
+# file_shape = os.path.join(path_dummy, '1D_voorland_transect_WS.shp')
+
+hubname = '29001016'
+
+switch_fig = True
+switch_output = True
 
 #%% input data
 buffer = 100
-spacing = 1
+spacing = 5
 
 #%% load shape and make buffer
 df_shp = gpd.read_file(file_shape)
+
+df_shp = df_shp[df_shp['HubName']==hubname]
+df_shp = df_shp.reset_index()
+
 df_shp_buffered = df_shp.buffer(buffer)
 from scipy.io import loadmat
 for scene,file in scene_dict.items():
@@ -75,7 +88,8 @@ for scene,file in scene_dict.items():
         
     elif gebied == 'WZ':
         # load data using mat73
-        data = mat73.loadmat(file)
+        # data = mat73.loadmat(file)
+        data = scipy.io.loadmat(file)
         x = data['grd']['x']
         y = data['grd']['y']
         z = data['grd']['dp']
@@ -124,16 +138,16 @@ for scene,file in scene_dict.items():
     ax[1].set_xlabel('distance [m]')
     ax[1].set_ylabel('height [m NAP]')
     ax[1].legend()
+    plt.ylim(-20,10)
 
     # export to figure
-    save_name = save_path+f'{gebied}_{scene}_bottom'
-    save_plot.save_plot(fig,save_name,ax = ax[1])
-
+    if switch_fig:
+        save_name = os.path.join(save_path, f'{scene}_{hubname}_profile')
+        save_plot.save_plot(fig,save_name,ax = ax[1])
+    
     #%% export to text file
-    save_file = save_path+f'{scene}_bottom.txt'
-    df_xy['zfilled'].to_csv(save_file,sep=' ', index=False, header=False, float_format='%.3f')
-
-
-
-
-
+    if switch_output:
+        save_bot = os.path.join(save_path, f'{scene}_{hubname}_bottom.txt')
+        df_xy['zfilled'].to_csv(save_bot, index=False, header=False, float_format='%.3f')
+        save_profile = os.path.join(save_path, f'{scene}_{hubname}_profile.txt')
+        df_xy.to_csv(save_profile,sep=',', index=False, header=True, float_format='%.3f')
