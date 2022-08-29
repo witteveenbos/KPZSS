@@ -8,10 +8,10 @@ The following steps are required to upload data to a session
    1. Which session you are working on (name);
    2. Which task (block) you are working on (name);
    3. which table you want to put your results in at top of the script;
-2. Get the job in the session;
+2. Get the task in the session;
 3. Set it on processing (just because we can);
 4. Upload the data
-5. Close the job. 
+5. Close the task. 
 """
 # import python modules
 import datetime
@@ -23,7 +23,7 @@ from ant import ant_helper_functions as ant_funcs
 project_name = 'Systeemanalyse Waterveiligheid'
 
 # step 1: specify 
-session_name = 'test_new'
+session_name = 'test_newest'
 task_name = 'calc'
 output_table = 'Calc_output'
 
@@ -35,23 +35,8 @@ ant_connection = ant_funcs.get_api_connection()
 project_id = ant_funcs.get_project_id(ant_connection, project_name=project_name)
 signed_in_user_uuid = ant_connection._make_api_request('user', 'GET')['id']
 
-# get first open task
-runs = ant_connection.tasks_read(project_id=project_id, status='open',
-                                 user=signed_in_user_uuid)
-
-found_job = False
-for task_dict in runs:
-    # get job
-    job = ant_connection.task_getJob(project_id, task_dict['id']) 
-    
-    # check if this is the one we want
-    if not isinstance(job, bool) and job['session_object']['name'] == session_name \
-        and job['task']['name'] == f'{task_name} Task':    
-            print("=== \nFound job\n===")
-            found_job = True
-            break
-if not found_job:
-    raise UserWarning('Did not find the right job. Did you assign the job to yourself?')
+task_dict, job = ant_funcs.find_task(ant_connection, project_id, signed_in_user_uuid, session_name,
+             task_name)
 
 # %% step 3: set task to pending
 datestring = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -74,5 +59,5 @@ result_dict = {'Name' : 'vanuit python',
 
 ant_connection.record_create(project_id, table_id, result_dict, session=job['session'])
 
-# %% step 5: finish the job
+# %% step 5: finish the task
 ant_connection.job_finish(project_id, job['id'])

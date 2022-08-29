@@ -125,3 +125,49 @@ def find_ids_or_records(records, cols_to_search, items_to_find, return_records=F
     
     raise UserWarning('Did not find the right record')
     
+def find_task(ant_connection, project_id, signed_in_user_uuid, session_name,
+             task_name):
+    """
+    finds open task that is assigned to user with uuid 'signed_in_user_uuid'
+    This task should be part of session with name 'session_name' and have the name
+    'task_name'
+
+    Parameters
+    ----------
+    ant_connection : initiated antconnect class
+    project_id : str, uuid of project
+    signed_in_user_uuid : str, uuid of user
+    session_name : str, name of the session that task belongs to
+    task_name : str, name of task to find
+
+    Raises
+    ------
+    UserWarning
+        When no matching task is found
+
+
+    Returns
+    -------
+    task_dict : dict with task data (one of the responses of ant_connection.tasks_read)
+    job : dict with job data (response from ant_connection.task_getJob)
+
+    """
+    # get first open task
+    runs = ant_connection.tasks_read(project_id=project_id, status='open',
+                                     user=signed_in_user_uuid)
+
+    found_job = False
+    for task_dict in runs:
+        # get job
+        job = ant_connection.task_getJob(project_id, task_dict['id']) 
+        
+        # check if this is the one we want
+        if not isinstance(job, bool) and job['session_object']['name'] == session_name \
+            and job['task']['name'] == f'{task_name} Task':    
+                print("=== \nFound job\n===")
+                found_job = True
+                break
+    if not found_job:
+        raise UserWarning('Did not find the right job. Did you assign the job to yourself?')
+
+    return task_dict, job

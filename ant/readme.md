@@ -124,10 +124,10 @@ The following steps are required to upload data to a session ([demo in this file
    1. Which session you are working on (name);
    2. Which task (block) you are working on (name);
    3. which table you want to put your results in at top of the script;
-2. Get the job in the session;
+2. Get the task in the session;
 3. Set it on processing (just because we can);
 4. Upload the data
-5. Close the job. 
+5. Close the task. 
 
 ### Read
 
