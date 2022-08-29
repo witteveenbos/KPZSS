@@ -17,7 +17,7 @@ import ant_helper_functions as ant_funcs
 import file_handling
 
 # specify folder
-folder_to_index = r'o:\KP_ZSS_download_from_STACK\Werkmappen HKV en WiBo\07_data_ant\01_databases_IPM'
+folder_to_index = r'o:\KP_ZSS_download_from_STACK\Werkmappen HKV en WiBo\07_data_ant\02_SWAN_2D_deps'
 root_folder_stack = r'o:\KP_ZSS_download_from_STACK\Werkmappen HKV en WiBo'
 stack_type = 'read-write'
 
@@ -33,18 +33,19 @@ project_id = ant_funcs.get_project_id(ant_connection, project_name=project_name)
 table_id = ant_funcs.get_table_id(ant_connection, project_id, table_name)
 
 # get all the files
-filelist = list_files_folders.list_files('', folder_to_index)
+filelist = list_files_folders.list_files('.bot', folder_to_index, endswith=True)
 
 # %%
 # loop over all files, get relevant information and push to ant
 for file in filelist:
+    
     print(f'starting on {file}')
     fingerprint = file_handling.get_fingerprint_from_file(file)
     
     # create a dict with a result. columns should have name of columns in output table
     result_dict = {'filename' : os.path.basename(file),
-                   'relative_location' : os.path.relpath(file, root_folder_stack),
-                   'fingerprint' : fingerprint,
-                   'STACK_type' : stack_type}
+                    'relative_location' : os.path.relpath(file, root_folder_stack),
+                    'fingerprint' : fingerprint,
+                    'STACK_type' : stack_type}
 
     ant_connection.record_create(project_id, table_id, result_dict)    

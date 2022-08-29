@@ -74,11 +74,11 @@ def get_table_id(ant, project_id, tableName):
             return tableID
     raise UserWarning('table "{tableName}" not found')
 
-def find_id_or_record(records, cols_to_search, items_to_find, find_id=True):
+def find_ids_or_records(records, cols_to_search, items_to_find, return_records=False):
     """
     returns the id or record of the first entry that matches items_to_find in cols_to_find
     
-    if find_id=True, it returns the id, otherwise the record
+    if return_record=True, it returns the id and records, otherwise the ids only
     
     For example:
         cols_to_search = ['Naam', 'Methode']
@@ -104,17 +104,112 @@ def find_id_or_record(records, cols_to_search, items_to_find, find_id=True):
             'df2985bd-7aa4-4bf6-b745-a50054e7e5ce'
         
     """
+    if np.size(cols_to_search) is not np.size(items_to_find):
+        raise UserWarning('cols_to_search and items_to_find do not have equal length, if you require more items per column consider looping in main script')
+    # define empty lists to store found ids and records
+    id_list = []
+    record_list = []
     # loop over all records
     for record in records:
         # check if all cols match
         if np.all([record[col]==item_to_find for col, item_to_find in zip(cols_to_search, items_to_find)]):
-            if find_id:
-                found_id = record['id']
-                return found_id
-            else:
-                return record
+            found_id = record['id']
+            # append to id_list and record_list
+            id_list.append(found_id)
+            record_list.append(record)
+                        
+    if not return_records:
+        return id_list
+    else:
+        return id_list, record_list
     
     raise UserWarning('Did not find the right record')
     
+def find_task(ant_connection, project_id, signed_in_user_uuid, session_name,
+             task_name):
+    """
+    finds open task that is assigned to user with uuid 'signed_in_user_uuid'
+    This task should be part of session with name 'session_name' and have the name
+    'task_name'
 
+    Parameters
+    ----------
+    ant_connection : initiated antconnect class
+    project_id : str, uuid of project
+    signed_in_user_uuid : str, uuid of user
+    session_name : str, name of the session that task belongs to
+    task_name : str, name of task to find
+
+    Raises
+    ------
+    UserWarning
+        When no matching task is found
+
+
+    Returns
+    -------
+    task_dict : dict with task data (one of the responses of ant_connection.tasks_read)
+    job : dict with job data (response from ant_connection.task_getJob)
+
+    """
+    # get first open task
+    runs = ant_connection.tasks_read(project_id=project_id, status='open',
+                                     user=signed_in_user_uuid)
+
+    found_job = False
+    session_names = []
+    task_names = []
+    for task_dict in runs:
+        # get job
+        job = ant_connection.task_getJob(project_id, task_dict['id']) 
+        
+        # check if this is the one we want
+        if not isinstance(job, bool):
+            session_names.append(job['session_object']['name'])
+            task_names.append(job['task']['name'])
+            if job['session_object']['name'] == session_name and job['task']['name'] == f'{task_name} Task':    
+                print("=== \nFound job\n===")
+                found_job = True
+                break
+    if not found_job:
+        raise UserWarning(f'Did not find the right task ("{task_name}") in session "{session_name}". '
+                          'Did you assign the job to yourself?\n'
+                          f'I found the following session names: {session_names}\n'
+                          f'I found the following task names: {task_names}')
+
+    return task_dict, job
+
+def find_session(ant_connection, project_id, session_name):
+    """
+    finds the right session, belonging to session_name
     
+    Parameters
+    ----------
+    ant_connection : initiated antconnect class
+    project_id : str, uuid of project
+    session_name : str, name of the session that task belongs to
+
+    Raises
+    ------
+    UserWarning
+        When no matching task is found
+
+
+    Returns
+    -------
+    session : dict with session data (one of the responses of ant_connection.project_sessions)
+
+    """
+    sessions = ant_connection.project_sessions(project_id, None)
+    
+    session_name_bools = [session_name == session['name'] for session in sessions]
+    
+    if sum(session_name_bools) == 1:
+        session = np.array(sessions)[session_name_bools][0]
+        print(f'Found session "{session["name"]}"')
+    elif sum(session_name_bools) == 0:
+        raise UserWarning(f'Found no session with name {session_name}. Only found "{[session["name"] for session in sessions]}"')
+    else:
+        raise UserWarning('Found more than one session. This should not be possible')
+        
+    return session
