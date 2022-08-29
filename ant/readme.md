@@ -131,6 +131,13 @@ The following steps are required to upload data to a session ([demo in this file
 
 ### Read
 
+The following steps are required to read session data ([demo in this file](https://github.com/witteveenbos/KPZSS/blob/main/example/demo_read_session_data.py)):
+1. Specify:
+   1. Which session you are working on (name);
+   2. which table you want to read data from;
+2. Get the session id
+3. read the data
+
 ## Used datamodel
 
 ![image](https://user-images.githubusercontent.com/68229914/183667963-a00443c5-c309-4e59-aa1e-8a1a46de903c.png)
