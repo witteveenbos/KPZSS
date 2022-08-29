@@ -116,7 +116,20 @@ for found_record in found_records:
 
 ## Working with sessions
 
-**Better description should be added**, for now, see [demo in this file]([../example/demo_upload.py](https://github.com/witteveenbos/KPZSS/blob/main/example/demo_upload.py))
+You can upload session data to a table and read session data from a table. Both princples are discuces below. 
+
+### Upload
+The following steps are required to upload data to a session ([demo in this file](https://github.com/witteveenbos/KPZSS/blob/main/example/demo_upload.py)):
+1. Specify:
+   1. Which session you are working on (name);
+   2. Which task (block) you are working on (name);
+   3. which table you want to put your results in at top of the script;
+2. Get the job in the session;
+3. Set it on processing (just because we can);
+4. Upload the data
+5. Close the job. 
+
+### Read
 
 ## Used datamodel
 
