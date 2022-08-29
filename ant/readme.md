@@ -129,9 +129,14 @@ The following steps are required to upload data to a session ([demo in this file
 4. Upload the data
 5. Close the task. 
 
-### Read
+### Read data while doing a task
 
-The following steps are required to read session data ([demo in this file](https://github.com/witteveenbos/KPZSS/blob/main/example/demo_read_session_data.py)):
+If you found the right task in the steps for uploading data, you can use the session id in `job['session']` to read data from a table. For instance with:
+`records = ant_connection.records_read(project_id, table_id, session=job['session'])`
+
+### Read without doing a task
+
+The following steps are required to read session data without doing a task ([demo in this file](https://github.com/witteveenbos/KPZSS/blob/main/example/demo_read_session_data.py)):
 1. Specify:
    1. Which session you are working on (name);
    2. which table you want to read data from;
