@@ -157,18 +157,25 @@ def find_task(ant_connection, project_id, signed_in_user_uuid, session_name,
                                      user=signed_in_user_uuid)
 
     found_job = False
+    session_names = []
+    task_names = []
     for task_dict in runs:
         # get job
         job = ant_connection.task_getJob(project_id, task_dict['id']) 
         
         # check if this is the one we want
-        if not isinstance(job, bool) and job['session_object']['name'] == session_name \
-            and job['task']['name'] == f'{task_name} Task':    
+        if not isinstance(job, bool):
+            session_names.append(job['session_object']['name'])
+            task_names.append(job['task']['name'])
+            if job['session_object']['name'] == session_name and job['task']['name'] == f'{task_name} Task':    
                 print("=== \nFound job\n===")
                 found_job = True
                 break
     if not found_job:
-        raise UserWarning('Did not find the right job. Did you assign the job to yourself?')
+        raise UserWarning(f'Did not find the right task ("{task_name}") in session "{session_name}". '
+                          'Did you assign the job to yourself?\n'
+                          f'I found the following session names: {session_names}\n'
+                          f'I found the following task names: {task_names}')
 
     return task_dict, job
 
