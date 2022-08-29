@@ -171,3 +171,38 @@ def find_task(ant_connection, project_id, signed_in_user_uuid, session_name,
         raise UserWarning('Did not find the right job. Did you assign the job to yourself?')
 
     return task_dict, job
+
+def find_session(ant_connection, project_id, session_name):
+    """
+    finds the right session, belonging to session_name
+    
+    Parameters
+    ----------
+    ant_connection : initiated antconnect class
+    project_id : str, uuid of project
+    session_name : str, name of the session that task belongs to
+
+    Raises
+    ------
+    UserWarning
+        When no matching task is found
+
+
+    Returns
+    -------
+    session : dict with session data (one of the responses of ant_connection.project_sessions)
+
+    """
+    sessions = ant_connection.project_sessions(project_id, None)
+    
+    session_name_bools = [session_name == session['name'] for session in sessions]
+    
+    if sum(session_name_bools) == 1:
+        session = np.array(sessions)[session_name_bools][0]
+        print(f'Found session "{session["name"]}"')
+    elif sum(session_name_bools) == 0:
+        raise UserWarning(f'Found no session with name {session_name}. Only found "{[session["name"] for session in sessions]}"')
+    else:
+        raise UserWarning('Found more than one session. This should not be possible')
+        
+    return session
