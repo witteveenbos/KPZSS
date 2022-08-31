@@ -21,10 +21,10 @@ from SWAN import get_ip_ant
 
 #%% Settings
 
-dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_04',
-        'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\_bodem',
-        'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\_rooster',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_04\input',
+dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\02_pilot\batch_03',
+        'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\02_pilot\_bodem',
+        'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\02_pilot\_rooster',
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\02_pilot\batch_03\input',
         'golfrand': r'z:\130991_Systeemanalyse_ZSS\2.Data\dummy\randvoorwaarden'}
 
 files = {'swan_templ':  'template.swn',
@@ -35,7 +35,7 @@ files = {'swan_templ':  'template.swn',
          'HRext01':     'HR_voorland_rand.pnt',
          'HRext02':     'HR_voorland_rand_300m_pilot.pnt',
          'diepwaterrandvoorwaarden': 'HKV2010_diepwaterrandvoorwaarden.xlsx',
-         'locaties':    'selectie_ill_pilot_v02.shp'}
+         'locaties':    'selectie_ill_pilot_v02_WS.shp'}
 
 node    = 'triton'
 ppn     = 4

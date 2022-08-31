@@ -13,9 +13,9 @@ from hmtoolbox.WB_basic import list_files_folders
 from hmtoolbox.WB_basic import save_plot
 import datetime
 
-path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\tests\batch_03'
+path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_03\G1'
 
-dirs = list_files_folders.list_folders(path_main, dir_incl='WS', startswith = True, endswith = False)
+dirs = list_files_folders.list_folders(path_main, dir_incl='WZ', startswith = True, endswith = False)
 
 params  = ['Hsig','RTpeak','Depth']
 labels  = ['Hsig (m)','Tp (s)', 'Water depth (m)']
@@ -29,11 +29,12 @@ for diri in dirs:
         subdir = os.path.basename(os.path.normpath(subdiri))
         title = subdir 
         fig = SWAN_quickplot.SWAN_quickplot_2D(file, parameters=params, parameters_clabel=labels, name=title,
-                          coord_unit='m', cmap='jet', quivers = True, contours = False, vec_thinning=50, 
+                          coord_unit='m', cmap='jet', quivers = False, contours = False, vec_thinning=50, 
                           wat_lev=0, vmin=False, vmax=False, sf=False, figsize = (8,12), rows=3, columns=1)
         
         save_name = os.path.join(diri, 'figures', os.path.basename(os.path.normpath(subdiri) + '_results.png'))
         save_plot.save_plot(fig, save_name, incl_wibo = False, dpi = 300, 
                       change_size = True, figwidth = 8, figheight = 10)
-        plt.close()
+        plt.close('all')
+        del fig
         print('End at {} doing stuff'.format(datetime.datetime.now()))
