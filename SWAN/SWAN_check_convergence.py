@@ -16,7 +16,7 @@ from hmtoolbox.WB_SWAN import SWAN_check_convergence
 
 # settings
 
-path_main   = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_03\G1'
+path_main   = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_04\G2'
 dirs        = list_files_folders.list_folders(path_main, dir_incl='WZ', startswith = True, endswith = False)
 
 # check convergence

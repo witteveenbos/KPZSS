@@ -6,14 +6,18 @@ Created on Mon Aug  8 15:44:00 2022
 """
 
 import os
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from hmtoolbox.WB_SWAN import SWAN_quickplot
 from hmtoolbox.WB_basic import list_files_folders
 from hmtoolbox.WB_basic import save_plot
 import datetime
+import gc
 
-path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_03\G1'
+
+path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_04\G1'
 
 dirs = list_files_folders.list_folders(path_main, dir_incl='WZ', startswith = True, endswith = False)
 
@@ -38,3 +42,4 @@ for diri in dirs:
         plt.close('all')
         del fig
         print('End at {} doing stuff'.format(datetime.datetime.now()))
+        gc.collect()

@@ -127,12 +127,10 @@ def overtopping(Hm0, Tm, slope, Rc, **kwargs):
     yb = yb
     yf = yf
     yv = yv
-
     # Calculate L0, sm and zeta
     L0    = g * Tm**2 / 2.0 / np.pi
     sm    = Hm0 / L0
     zeta[valid_ind]  = slope / np.sqrt(sm)
-
     q1[valid_ind] = par.C1a / np.sqrt(slope) * np.sqrt(g * Hm0**3) * yb * zeta[valid_ind]
     q1[valid_ind] *= np.exp(-(par.C1b * Rc / (zeta[valid_ind] * Hm0 * yb * yf * ybeta * yv))**par.C1c)
 

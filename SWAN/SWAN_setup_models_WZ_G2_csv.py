@@ -20,20 +20,21 @@ from SWAN import interp_offshore_waves
 
 #%% Settings
 
-dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_03\G2',
+dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G2_01',
         'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\_bodem\G2',
         'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\_rooster',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_03\input',
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\input',
         'golfrand': r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\_randvoorwaarden'}
 
-files = {'swan_templ':  'template_G2.swn',
-         'qsub_templ':  'dummy.qsub',
+files = {'swan_templ':  'template_G2_01.swn',
+         'qsub_templ':  'dummy_refrac.qsub',
          'scen_xlsx':   'scenarios_SWAN_2D_WZ_v01.xlsx',
          'hyd_output':  'hydra_output_totaal_dsn_mod.csv',
          'grid':        'WADIN1A.GRD',
          'diepwaterrandvoorwaarden': 'HKV2010_diepwaterrandvoorwaarden.xlsx',
          'locaties':    'selectie_ill_pilot_v03_WZ.shp'}
 
+node    = 'galatea'
 ppn     = 4
 
 #%% Read scenario input
@@ -66,12 +67,7 @@ df_golfran_SON = xl_golfrand.parse(sheet_name = 'SON',skiprows=1).drop([0,1])
 # loop over scenario's
 
 for ss in range(len(df_scen)):
-    
-    if ss < 8:
-        node = 'galatea'
-    elif ss >= 8:
-         node = 'naiad' 
-    
+       
     # make scenario directory
     bot_scen = str(df_scen.Naam[ss])
     dir_scen = os.path.join(dirs['main'], bot_scen)

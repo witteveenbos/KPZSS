@@ -20,21 +20,21 @@ from SWAN import interp_offshore_waves
 
 #%% Settings
 
-dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_04\G1',
-        'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\_bodem\G1',
-        'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\_rooster',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_04\input',
-        'golfrand': r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\_randvoorwaarden'}
+dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G1_01_refrac',
+        'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\_bodem\G1_02',
+        'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\_rooster',
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\input',
+        'golfrand': r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\_randvoorwaarden'}
 
-files = {'swan_templ':  'template_G1.swn',
-         'qsub_templ':  'dummy.qsub',
+files = {'swan_templ':  'template_G1_02.swn',
+         'qsub_templ':  'dummy_refrac.qsub',
          'scen_xlsx':   'scenarios_SWAN_2D_WZ_v01.xlsx',
          'hyd_output':  'hydra_output_totaal_dsn_mod.csv',
          'grid':        'WADOUT1A.GRD',
          'diepwaterrandvoorwaarden': 'HKV2010_diepwaterrandvoorwaarden.xlsx',
          'locaties':    'selectie_ill_pilot_v03_WZ.shp'}
 
-node    = 'triton'
+node    = 'galatea'
 ppn     = 4
 
 #%% Read scenario input
@@ -129,7 +129,8 @@ for ss in range(len(df_scen)):
         
         gamma       = 3.3 # default for all boundary conditions
         
-        conid       = "WZ%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_eld, tp_eld, dirw_eld)
+        # conid       = "WZ%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_eld, tp_eld, dirw_eld)
+        conid       = "WS%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_eld, tp_eld, dirw_eld)
         runid       = 'ID' + locid + '_' + conid
         swan_out    = runid + '.swn'
         qsub_out    = runid + '.qsub'
