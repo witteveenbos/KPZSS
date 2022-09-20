@@ -16,6 +16,9 @@ The following steps are done
 """
 # import python modules
 import datetime
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # import own modules
 from ant import ant_helper_functions as ant_funcs
@@ -24,7 +27,7 @@ from ant import ant_helper_functions as ant_funcs
 project_name = 'Systeemanalyse Waterveiligheid'
 
 # step 1: specify 
-session_name = 'testmetdaan'
+session_name = 'test-hbn'
 task_name = 'Hydra Berekeningen'
 output_table = 'DBM_HRD_berekening'
 
@@ -64,9 +67,10 @@ result_dict = {'id': '0f91fcab-7c8d-4ab1-abea-da6b8328ba2b',
              'Bijzonderheden': 'n.v.t.',
              'Goedgekeurd': False,
              'Opmerkingen': 'testdata',
-             'Uitvoer_file' : ant_connection.parse_document(r'd:\Users\VERA7\Downloads\uitvoer.html', 'uitvoer.html')}
+             'Uitvoer_file' : 'test' }
+            #  ant_connection.parse_document(r'd:\Users\VERA7\Downloads\uitvoer.html', 'uitvoer.html')}
 
 ant_connection.record_create(project_id, table_id, result_dict, session=job['session'])
 
 # %% step 5: finish the task
-ant_connection.job_finish(project_id, job['id'])
+# ant_connection.job_finish(project_id, job['id'])

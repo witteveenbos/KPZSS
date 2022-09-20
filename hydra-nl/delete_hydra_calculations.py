@@ -6,7 +6,7 @@ hydra_werkmap = r'C:\MyPrograms\Hydra-NL_KP_ZSS\werkmap'
 for folder in os.listdir(hydra_werkmap):
 
     # geïnteresseerd in de data van generieke database-namen
-    string_to_match = ["Westerschelde", "Waddenzee"]
+    string_to_match = ["Westerschelde", "Waddenzee", "Hollandse_Kust"]
 
     for substring in string_to_match:
         if substring in folder:
