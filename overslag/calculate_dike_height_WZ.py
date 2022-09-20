@@ -43,7 +43,7 @@ for index, combination in combinations.iterrows():
         yv = 1
         
         # Estimate overtopping discharge every cm
-        Rc = np.arange(10,-0.02,-0.01)
+        Rc = np.arange(25,-0.02,-0.01)
         q = np.zeros(Rc.shape)
         for i, RC in enumerate(Rc):
             q[i] = overtopping(np.array(Hm0),np.array(Tm),np.array(slope),np.array(RC), 
