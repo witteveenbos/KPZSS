@@ -16,7 +16,7 @@ import geopandas as gpd
 dirs    = {'input':     r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode',
            'output':    r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode'}
 
-files   = {'okader':    'OKADER_FC_Hydra_WS.shp',
+files   = {'okader':    'okader_fc_hydra_unique_handedit_WS.shp',
            'hydra':     'HRD_locations_hydra_WS.shp',
            'result':    'HRD_locations_selectie_WS.csv'}
 
