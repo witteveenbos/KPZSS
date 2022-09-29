@@ -8,8 +8,8 @@ Created on Tue Aug 30 14:25:16 2022
 #%% import
 
 import os
-import matplotlib
-matplotlib.use('agg')
+#import matplotlib
+#matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from hmtoolbox.WB_basic import list_files_folders
@@ -22,10 +22,10 @@ import gc
 
 #%% settings
 
-path_main_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_04\G1'
-path_main_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_04\G2'
+path_main_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G1_01'
+path_main_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G2_01'
 
-save_switch = True
+save_switch = False
 
 figsize = (8,12)
 
@@ -33,8 +33,8 @@ vec_thinning = 40
 
 #%% get directions with output data
 
-dirs_01 = list_files_folders.list_folders(path_main_01, dir_incl='WZ_VM_03_200_H', startswith = True, endswith = False)
-dirs_02 = list_files_folders.list_folders(path_main_02, dir_incl='WZ_VM_03_200_H', startswith = True, endswith = False)
+dirs_01 = list_files_folders.list_folders(path_main_01, dir_incl='WZ_VM_01_050_F', startswith = True, endswith = False)
+dirs_02 = list_files_folders.list_folders(path_main_02, dir_incl='WZ_VM_01_050_F', startswith = True, endswith = False)
 
 if len(dirs_01) == len(dirs_01):
     print('== list of dirs for G1 is the same length as for G2')
@@ -164,7 +164,7 @@ for diri in dirs_01:
             save_name = os.path.join(diri, 'figures', os.path.basename(os.path.normpath(subdiri) + '_results_combined.png'))
             save_plot.save_plot(fig, save_name, incl_wibo = False, dpi = 300, 
                       change_size = True, figwidth = 8, figheight = 10)
-        plt.close('all')
-        del fig
+        #plt.close('all')
+        #del fig
         print('End at {} doing stuff'.format(datetime.datetime.now()))
         gc.collect()
