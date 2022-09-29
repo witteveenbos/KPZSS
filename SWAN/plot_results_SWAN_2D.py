@@ -16,10 +16,11 @@ from hmtoolbox.WB_basic import save_plot
 import datetime
 import gc
 
+gebied = 'WS'
 
-path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_04\G1'
+path_main = r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\TEMP'
 
-dirs = list_files_folders.list_folders(path_main, dir_incl='WZ', startswith = True, endswith = False)
+dirs = list_files_folders.list_folders(path_main, dir_incl=gebied, startswith = True, endswith = False)
 
 params  = ['Hsig','RTpeak','Depth']
 labels  = ['Hsig (m)','Tp (s)', 'Water depth (m)']

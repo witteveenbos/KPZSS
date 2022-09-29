@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep 15 13:26:10 2022
+Created on Thu Sep 22 14:43:06 2022
 
 @author: ENGT2
 """
@@ -19,9 +19,9 @@ from hmtoolbox.WB_basic import save_plot
 #%% settings
 
 dirs = {'input':    r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_HBN',
-        'output':   r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\03_productiesommen\serie_02\input'}
+        'output':   r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_HBN'}
 
-files = {'hyd_output':  'Westerschelde_HBN_v3.csv'}
+files = {'hyd_output':  'Waddenzee_HBN_v3.csv'}
 
 # scenarios = df_hyd['ZSS-scenario'].unique()
 scenarios = ["'KPZSS_2023_Referentie'", 
@@ -31,7 +31,7 @@ scenarios = ["'KPZSS_2023_Referentie'",
 save_excel  = False
 save_fig    = False
 
-scenario_sel = scenarios[0]
+scenario_sel = scenarios[6]
 
 # set bins
 h_bins = np.array([2,3,4,5,6,7,8,9,10,11,12])
@@ -373,7 +373,7 @@ else:
 
 # save result
 if save_excel:         
-    binning.to_excel(os.path.join(dirs['output'],'IP_binning_WZ_%s.xlsx' % scenario_sel[1:-1]))
+    binning.to_excel(os.path.join(dirs['output'],'IP_binning_WS_%s.xlsx' % scenario_sel[1:-1]))
 
 
 #%% allocated okader ids that have not been allocated yet (NOT WORKING YET)

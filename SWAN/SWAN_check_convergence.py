@@ -16,8 +16,10 @@ from hmtoolbox.WB_SWAN import SWAN_check_convergence
 
 # settings
 
-path_main   = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_04\G2'
-dirs        = list_files_folders.list_folders(path_main, dir_incl='WZ', startswith = True, endswith = False)
+gebied = 'WS'
+
+path_main   = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\03_productiesommen\serie_02'
+dirs        = list_files_folders.list_folders(path_main, dir_incl=gebied, startswith = True, endswith = False)
 
 # check convergence
 
@@ -35,7 +37,7 @@ for diri in dirs:
             plt.text(2,convergence_list[-1],"max. convergence = %.2f%%" % convergence_list[-1])
             plt.xlabel('Iteration [nr.]')
             plt.ylabel('Convergence [%]')
-            plt.title('SWAN convergence WS')
+            plt.title('SWAN convergence')
             if save_fig:
                 savename = os.path.join(diri, 'figures', os.path.basename(os.path.normpath(subdiri) + '_convergence_prt-001.png'))
                 save_plot.save_plot(fig, savename, incl_wibo = False, dpi = 300, 
