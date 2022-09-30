@@ -23,25 +23,33 @@ import gc
 
 #%% settings
 
-#referentie
-path_main_G1_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G1_01'
-path_main_G2_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G2_01'
-
-#bodem
-path_main_G1_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G1_02'
-path_main_G2_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G2_02'
-output_path = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\sensitivity\bodem'
-
-#refractie
-# path_main_G1_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G1_01'
-# path_main_G2_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G2_01'
-# output_path = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\sensitivity\refractie'
+test = 'refractie'
 
 save_switch = True
 
 figsize = (8,4)
 
-vec_thinning = 40
+if test == 'bodem':
+    #bodem
+    #referentie (_01)
+    path_main_G1_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G1_01'
+    path_main_G2_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G2_01'
+    
+    #bodem (_02)
+    path_main_G1_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G1_02'
+    path_main_G2_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G2_02'
+    output_path = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\sensitivity\bodem'
+
+if test == 'refractie':
+    #refractie
+    #referentie (_01), note that G1_01 still reads the _02 bottoms, mail Tim 30-9-2022
+    path_main_G1_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G1_02'
+    path_main_G2_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G2_02'
+    
+    #refractie (_02), note that the refractie simulations were performed with 01 bottom, naming of folder is not correct
+    path_main_G1_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G1_01'
+    path_main_G2_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G2_01'
+    output_path = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\sensitivity\refractie'
 
 #%% get directions with output data
 
@@ -73,6 +81,8 @@ for d in range(len(dirs_G2_01)):
     #%% Read G1 and G2 output
     data_G2_01, header = SWAN_read_tab.Freadtab(dirs_G2_01[d])
     data_G2_02, header = SWAN_read_tab.Freadtab(dirs_G2_02[d])
+    data_G2_01['Hsig'][data_G2_01['Hsig']<0] = np.nan
+    data_G2_02['Hsig'][data_G2_02['Hsig']<0] = np.nan
 
     #%% Plot results
     fig = plt.figure(figsize=figsize)
