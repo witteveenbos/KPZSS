@@ -17,19 +17,19 @@ import scipy.interpolate
 #%% Settings
 
 path_locations = r'z:\130991_Systeemanalyse_ZSS\2.Data\GIS_TEMP\okader_fc_hydra_unique_handedit_WS_havens_berm_1d-flag.shp'
-path_ws = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\WS_Westerschelde_04102022.xlsx'
+path_ws = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\WS_Westerschelde_04102022_v3.xlsx'
 
 path_out = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Frequentielijnen'
 
-switch_excel = False
-switch_plot = True
+switch_excel = True
+switch_plot = False
 
 corr_2023_1995 = 0.05
 
 # Frequencies to extrapolate
 freqs = [1/10, 1/30, 1/42, 1/50, 1/100, 1/300, 1/417, 1/500, 1/833, 1/1000, 
          1/1250, 1/2500, 1/3000, 1/4167, 1/5000, 1/8333, 1/10000, 1/12500, 
-         1/25000, 1/30000, 1/37500, 1/41667, 1/50000, 1/83333, 1/1.00E+05, 
+         1/25000, 1/30000, 1/37500, 1/41667, 1/50000, 1/83333, 1/1.00E+05,
          8.00E-06, 4.00E-06, 1.20E-06, 1.20E-07]
 
 scenarios = ['Laag_2023_0', 'Laag_2050_25', 'Laag_2100_50', 'Laag_2150_75', 
@@ -49,8 +49,9 @@ locations = gpd.read_file(path_locations)
 df_water = pd.read_excel(path_ws)
 
 # Create output Excel
-freq_result = pd.DataFrame({'werkmap': [], 'database': [], 'vakid': [], 
-                          'locatie': [], 'bertype': [], 'profiel': [], 
+freq_result = pd.DataFrame({'vakid': [], 'werkmap': [], 'database': [], 
+                          'locatie': [], 'x': [], 'y': [], 'bertype': [], 
+                          'profiel': [], 'zichtjaar': [], 'tijdlijn': [],
                           'berekening': [], 'F001': [], 'H001': [], 'F002': [],
                           'H002': [], 'F003': [], 'H003': [], 'F004': [], 
                           'H004': [], 'F005': [], 'H005': [], 'F006': [], 
@@ -72,7 +73,7 @@ def interpolate(x, x_interpolate, y_interpolate):
     return np.round(interp(np.log10(x)), 3)
 
 for index, row in locations.iterrows():
-    print(index)
+    # print(index)
     location = row.VakId
     hydraulic = df_water[df_water.Locatie==row.Name]
     # if len(location) > 1:
@@ -80,24 +81,31 @@ for index, row in locations.iterrows():
     for scenario in scenarios:
         data = {}
         data['werkmap'] = 'werkmap'
-        data['database'] = hydraulic.Randvoorwaardendatabase
+        data['x'] = hydraulic.X.iloc[0]
+        data['y'] = hydraulic.Y.iloc[0]
+        data['zichtjaar'] = scenario.split('_')[1]
+        data['tijdlijn'] = scenario.split('_')[0]
+        data['database'] = hydraulic.Randvoorwaardendatabase.iloc[0]
         data['vakid'] = location
         data['locatie'] = hydraulic.Locatie.iloc[0]
         data['bertype'] = 'waterstand'
         data['profiel'] = '-'
         data['berekening'] = scenario
         
-        break
+        # break
+        
         
         # Create prob's and wl (correct for sealevel rise (in cm))
         x_interpolate = list(reversed(sorted((1/hydraulic.iloc[:,9]).tolist())))
         x_log_interpolate = np.log10(x_interpolate)
+
+        # break
         
         if '2023' in scenario:
             zss = 0
         else:
             zss = float(scenario.split('_')[-1])/100 - corr_2023_1995
-            
+                   
         y_interpolate = sorted((hydraulic.iloc[:,10] + float(scenario.split('_')[-1])/100).tolist())
         x = []
         y = []
@@ -114,7 +122,6 @@ for index, row in locations.iterrows():
 
         freq_result = freq_result.append(data, ignore_index=True)
         
-        break
 
 if switch_excel:
-    freq_result.to_excel(os.path.join(path_out,'Waterlevel_frequencies_processed_waddenzee.xlsx'), index=False)
+    freq_result.to_excel(os.path.join(path_out,'Waterlevel_frequencies_processed_westerschelde.xlsx'), index=False)
