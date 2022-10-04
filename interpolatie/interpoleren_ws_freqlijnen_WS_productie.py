@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Aug 12 14:54:31 2022
+Created on Tue Oct  4 08:20:33 2022
 
-@author: ESB
+@author: ENGT2
 """
 
 #%% Modules
@@ -16,13 +16,13 @@ import scipy.interpolate
 
 #%% Settings
 
-path_locations = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_01\input\selectie_ill_pilot_v03_WZ.shp'
-path_ws = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Waddenzee_WS.xlsx'
+path_locations = r'z:\130991_Systeemanalyse_ZSS\2.Data\GIS_TEMP\okader_fc_hydra_unique_handedit_WS_havens_berm_1d-flag.shp'
+path_ws = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\WS_Westerschelde_04102022.xlsx'
 
-path_out = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_03'
+path_out = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Frequentielijnen'
 
 switch_excel = False
-switch_plot = False
+switch_plot = True
 
 corr_2023_1995 = 0.05
 
@@ -73,7 +73,7 @@ def interpolate(x, x_interpolate, y_interpolate):
 
 for index, row in locations.iterrows():
     print(index)
-    location = row.FC_VakID
+    location = row.VakId
     hydraulic = df_water[df_water.Locatie==row.Name]
     # if len(location) > 1:
     #     print(f'Error at row {index}')
@@ -81,7 +81,7 @@ for index, row in locations.iterrows():
         data = {}
         data['werkmap'] = 'werkmap'
         data['database'] = hydraulic.Randvoorwaardendatabase
-        data['vakid'] = str(row.FC_VakID)
+        data['vakid'] = location
         data['locatie'] = hydraulic.Locatie.iloc[0]
         data['bertype'] = 'waterstand'
         data['profiel'] = '-'
@@ -113,6 +113,8 @@ for index, row in locations.iterrows():
             plt.show()
 
         freq_result = freq_result.append(data, ignore_index=True)
+        
+        break
 
 if switch_excel:
     freq_result.to_excel(os.path.join(path_out,'Waterlevel_frequencies_processed_waddenzee.xlsx'), index=False)

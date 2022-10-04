@@ -15,18 +15,18 @@ import numpy as np
 
 # Settings
 
-dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\serie_01',
+dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\iter_01',
         'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\_bodem',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\serie_01\input'}
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\iter_01\input'}
 
 files = {'swan_templ':  'template.swn',
          'qsub_templ':  'dummy.qsub',
          'scen_xlsx':   'scenarios_SWAN_2D_WS_v02.xlsx',
-         'swan_output':  'output_productie_SWAN2D_WS.xlsx'}
+         'swan_output': 'output_productie_SWAN2D_WS.xlsx'}
 
 outloc = 'HRext01'
 
-node = 'naiad'
+node = 'despina'
 ppn = 1
 
 # Read scenario input
@@ -40,6 +40,8 @@ xl_input  = pd.ExcelFile(os.path.join(dirs['input'],files['swan_output']),engine
 df_input = xl_input.parse(sheet_name = outloc)
 
 prof_not_found = []
+
+profile_info = []
 
 # loop over scenario's
 
@@ -80,20 +82,33 @@ for ss in range(len(df_scen)):
             dy = df_prof['y'].iloc[0] - df_prof['y'].iloc[-1]
             dir_profile= deg2uv.uv2deg(dx, dy, 'nautical')
             
+            output = {'OkaderId':       df_input_scen['OkaderId'][cc],
+                      'Scenario':       df_input_scen['Scenario'][cc],
+                      'dir_profile':    dir_profile}
+            profile_info.append(output)
+            
             # determine wind direction relative to 1D profile
             uu = df_input_scen['X-Windv'][cc]
             vv = df_input_scen['Y-Windv'][cc]
             dir_wind = round(deg2uv.uv2deg(uu, vv, 'nautical'))
-            dir_wind_rel = abs(dir_wind - dir_profile)
+            dir_wind_rel = dir_wind - dir_profile
             dir_wind_swan = 90 + dir_wind_rel # 90 degrees is orientaion 1D profile in SWAN
+            if dir_wind_swan >= 360:
+                dir_wind_swan = dir_wind_swan - 360
+            elif dir_wind_swan < 0:
+                dir_wind_swan = dir_wind_swan + 360
             
             # determine wind speed
             speed_wind = np.sqrt(uu**2 + vv**2)
             
             # determine wave direction relative to 1D profile
             dir_wave = df_input_scen['Dir'][cc]
-            dir_wave_rel = abs(dir_wave - dir_profile)
+            dir_wave_rel = dir_wave - dir_profile
             dir_wave_swan = 90 + dir_wave_rel # 90 degrees is orientaion 1D profile in SWAN
+            if dir_wave_swan >= 360:
+                dir_wave_swan = dir_wave_swan - 360
+            elif dir_wave_swan < 0:
+                dir_wave_swan = dir_wave_swan + 360
                    
             # get dimensions of computational grid
             xlenc       = df_prof['distance'].iloc[-1]
@@ -160,5 +175,7 @@ for ss in range(len(df_scen)):
         else:   
             print('profile for %s not found' % row['OkaderId'])
             prof_not_found.append(row['OkaderId'])
-    break
+            
+output_df = pd.DataFrame(profile_info)
+output_df.to_excel(os.path.join(dirs['bathy'],'profile_info_SWAN1D_WS.xlsx')) 
         
