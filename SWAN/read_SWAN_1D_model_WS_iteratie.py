@@ -31,7 +31,7 @@ save_fig = False
 
 new_iteration = False
 
-save_result = True
+save_result = False
 
 # path with new iteration
 path_new = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\iter_03'
@@ -148,7 +148,8 @@ for tab_file in tab_files:
     Hs_D = Hs_300_2d / Dep_out
     Hs_decr_rel = (Hs_out - Hs_300_2d) / Hs_300_2d
     
-    z_200m = -data['Botlev'][data['Xp'] <= 200]
+    # z_200m = -data['Botlev'][data['Xp'] <= 200]
+    z_200m = -data['Botlev'][(data['Xp'] >= Xpteen) & (data['Xp'] <= 200)]
     z_200m_avg = np.mean(z_200m)
            
     #%% maximum values for ylimits

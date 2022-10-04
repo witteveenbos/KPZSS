@@ -22,6 +22,8 @@ path_output = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WS'
 
 outloc = 'HRbasis'
 
+save_excel = True
+
 #%% read data
 
 xl_2d  = pd.ExcelFile(path_output_2d,engine='openpyxl')
@@ -36,9 +38,7 @@ df_vakken = gp.read_file(path_shape_vakken)
 
 ##########
 #
-# check for nans or -9 or -99 or -999 in 1d and 2d output, that will screw things up
-# make sure for every OKid 1 choice is made: SWAN 2D, SWAN 1D or SWAN 2D + haven
-# changing between output typ (2c. 1D etc.) will give messed up delta's
+# !!Take wave direction from SWAN 2D at HRbasis!!
 #
 ######
 
@@ -51,6 +51,9 @@ scenarios = df_2d['Scenario'].unique()
 for OKid in OKids:
     
     for scenario in scenarios:
+        
+        ZSS = float(scenario.split('_')[-2])/100
+        bot_scen = scenario.split('_')[-4]
         
         # OKADEr vak info
         info_vak        = df_vakken[df_vakken['VakId']==str(OKid)]
@@ -88,10 +91,15 @@ for OKid in OKids:
                 use_2d      = 0
                 use_1d      = 0
                 use_haven   = 1
-            elif switch_1d == 1 and switch_haven == 'Nee' and Hs_300m_diff <= 0.2 and Tm10_300m_diff <= 0.5 and Hs_decr_rel <= -0.10:
-                use_2d      = 0
-                use_1d      = 1
-                use_haven   = 0
+            elif switch_1d == 1 and switch_haven == 'Nee' and Hs_300m_diff <= 0.2 and Tm10_300m_diff <= 0.25: 
+                if Hs_decr_rel <= -0.10 or z_200m_avg >= 1:
+                    use_2d      = 0
+                    use_1d      = 1
+                    use_haven   = 0
+                else:
+                    use_2d      = 1
+                    use_1d      = 0
+                    use_haven   = 0
             else:
                 use_2d      = 1
                 use_1d      = 0
@@ -115,7 +123,10 @@ for OKid in OKids:
                       'z_avg':    z_200m_avg}
         elif use_haven == 1:
             print(f'{scenario} {OKid}: use harbour correction')
-            z_haven = float(info_vak['D'].iloc[0])
+            if bot_scen == 'VM':
+                z_haven = float(info_vak['D'].iloc[0]) + ZSS
+            else:
+                z_haven = float(info_vak['D'].iloc[0])
             WL = output_2d['Watlev'].iloc[0] 
             D  = WL - z_haven 
             if D <= 0:
@@ -168,4 +179,6 @@ for OKid in OKids:
 #%% convert to dataframe
 
 output_df = pd.DataFrame(appended_data)
-output_df.to_excel(os.path.join(path_output,'output_productie_combined_WS.xlsx'))
+
+if save_excel:
+    output_df.to_excel(os.path.join(path_output,'output_productie_combined_WS.xlsx'))
