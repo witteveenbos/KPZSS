@@ -13,8 +13,8 @@ from hmtoolbox.WB_basic import save_plot
 
 #%% Setting
 
-path_input = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\01_tests\batch_03'
-filename = 'Waterlevel_frequencies_processed_waddenzee.xlsx'
+path_input = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Frequentielijnen'
+filename = 'Waterlevel_frequencies_processed_westerschelde_engt2.xlsx'
 
 path_out = path_input
 
@@ -37,7 +37,7 @@ tijdlijnen = pd.read_excel(os.path.join(path_input,filename))
 
 #%% Plot tijdlijnen
 
-OKids = tijdlijnen['vakid']
+OKids = tijdlijnen['vakid'].unique()
 
 for Naam in Namen:
 
