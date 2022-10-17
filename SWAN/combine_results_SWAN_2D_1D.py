@@ -91,7 +91,8 @@ for OKid in OKids:
                 use_2d      = 0
                 use_1d      = 0
                 use_haven   = 1
-            elif switch_1d == 1 and switch_haven == 'Nee' and Hs_300m_diff <= 0.2 and Tm10_300m_diff <= 0.25: 
+            # elif switch_1d == 1 and switch_haven == 'Nee' and Hs_300m_diff <= 0.2 and Tm10_300m_diff <= 0.25: 
+            elif switch_1d == 1 and switch_haven == 'Nee' and abs(Hs_300m_diff) <= 0.2 and abs(Tm10_300m_diff) <= 0.25: 
                 if Hs_decr_rel <= -0.10 or z_200m_avg >= 1:
                     use_2d      = 0
                     use_1d      = 1
@@ -149,6 +150,12 @@ for OKid in OKids:
                       'z_avg':    z_200m_avg}
         elif use_1d == 1:
             print(f'{scenario} {OKid}: use 1D result')
+            dir_swan2d =  output_2d['Dir'].iloc[0]
+            dir_swan1d =  output_1d['Dir_abs'].iloc[0]
+            if dir_swan2d < 0:
+                dir_use_1d = dir_swan1d
+            else:
+                dir_use_1d = dir_swan2d
             output = {'OkaderId': OKid,
                       'x_okader_middelpunt': x_okader_mp,
                       'y_okader_middelpunt': y_okader_mp,
@@ -158,7 +165,8 @@ for OKid in OKids:
                       'Hsig':     output_1d['Hsig'].iloc[0],
                       'Tpsmoo':   output_1d['TPsmoo'].iloc[0],
                       'Tm_10':    output_1d['Tm_10'].iloc[0],
-                      'Dir':      output_1d['Dir_abs'].iloc[0],
+                      # 'Dir':      output_1d['Dir_abs'].iloc[0],
+                      'Dir':      dir_use_1d,
                       'SWAN2D':   0,
                       'SWAN1D':   1,
                       'Haven':    0,
@@ -181,4 +189,4 @@ for OKid in OKids:
 output_df = pd.DataFrame(appended_data)
 
 if save_excel:
-    output_df.to_excel(os.path.join(path_output,'output_productie_combined_WS.xlsx'))
+    output_df.to_excel(os.path.join(path_output,'output_productie_combined_WS_v04.xlsx'))

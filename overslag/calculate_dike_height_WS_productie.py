@@ -13,9 +13,9 @@ import numpy as np
 from overtopping import overtopping
 
 # settings
-path_input = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WS\output_productie_combined_WS.xlsx'
-path_locations = r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode\shape + 1d-flag\okader_fc_hydra_unique_handedit_WS_havens_berm_1d-flag.shp'
-path_out = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WS'
+path_input      = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WS\concept02\output_productie_combined_WS_v04.xlsx'
+path_locations  = r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode\shape + 1d-flag\okader_fc_hydra_unique_handedit_WS_havens_berm_1d-flag.shp'
+path_out        = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WS\concept02'
 
 save_excel = False
 
@@ -39,8 +39,8 @@ for index, combination in combinations.iterrows():
         Hm0 = combination.Hsig
         Tm = combination.Tm_10
         slope = 1/float(location.FC_Tld[-1])
-        yb = location.y_b
-        betaw = abs(location.FC_DN-combination.Dir)
+        yb = float(location.y_b)
+        betaw = abs(int(location.FC_DN)-combination.Dir)
         yf = 1
         yv = 1
         
