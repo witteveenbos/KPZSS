@@ -27,7 +27,7 @@ tab_files = list_files_folders.list_files('.TAB',path_results_1D)
 path_input = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\iter_01\input'
 file_input = r'output_productie_SWAN2D_WS.xlsx'
 
-save_fig = False
+save_fig = True
 
 new_iteration = False
 
@@ -58,7 +58,7 @@ df_profile  = xl_profile.parse()
 
 appended_output = []
 
-for tab_file in tab_files:
+for tab_file in tab_files[1216:1519]:
     
     scene = tab_file.split('\\')[-3]
     simulation = tab_file.split('\\')[-2]
@@ -85,6 +85,7 @@ for tab_file in tab_files:
     Hs_basis = df_basis[match2]['Hsig'].iloc[0]
     Tp_basis = df_basis[match2]['TPsmoo'].iloc[0]
     Tm10_basis = df_basis[match2]['Tm_10'].iloc[0]
+    Dir_basis = df_basis[match2]['Tm_10'].iloc[0]
 
     data, headers = SWAN_read_tab.Freadtab(tab_file)
     
@@ -259,74 +260,74 @@ for tab_file in tab_files:
     
     appended_output.append(output)
               
-    # #%% plotting
-    # fig = plt.figure(figsize=(12,7))
-    # ax1 = plt.subplot(2,1,1)
-    # ax1_copy = ax1.twinx()
+    #%% plotting
+    fig = plt.figure(figsize=(12,7))
+    ax1 = plt.subplot(2,1,1)
+    ax1_copy = ax1.twinx()
     
-    # ax1.plot(data['Xp'],-data['Botlev'],'k', linewidth = 3, label = 'bodem')
-    # ax1.plot(data['Xp'], data['Watlev'], 'b-', linewidth = 1.5, label = 'waterstand')
-    # ax1.axvline(x = Xpteen, color = 'k', linestyle='--', label = 'teen')
-    # ax1.axvline(x = Xpout, color = 'r', linestyle='--', label = 'teen + 1/2*L')
-    # ax1.axvline(x = Xp_300, color = 'tab:orange', linestyle='--', label = 'teen + 300m')
-    # # ax1.axvline(x = Xp_basis, color = 'y', linestyle='--', label = 'HRbasis')
-    # ax1.set_ylabel('hoogte [m+NAP]')
-    # ax1.set_xlabel('afstand [m]')
-    # ax1.legend(loc = 'lower right')
-    # # ax1.set_xlim(30,100)
-    # # ax1.set_ylim(-20,10)
+    ax1.plot(data['Xp'],-data['Botlev'],'k', linewidth = 3, label = 'bodem')
+    ax1.plot(data['Xp'], data['Watlev'], 'b-', linewidth = 1.5, label = 'waterstand')
+    ax1.axvline(x = Xpteen, color = 'k', linestyle='--', label = 'teen')
+    ax1.axvline(x = Xpout, color = 'r', linestyle='--', label = 'teen + 1/2*L')
+    ax1.axvline(x = Xp_300, color = 'tab:orange', linestyle='--', label = 'teen + 300m')
+    # ax1.axvline(x = Xp_basis, color = 'y', linestyle='--', label = 'HRbasis')
+    ax1.set_ylabel('hoogte [m+NAP]')
+    ax1.set_xlabel('afstand [m]')
+    ax1.legend(loc = 'lower right')
+    # ax1.set_xlim(30,100)
+    # ax1.set_ylim(-20,10)
 
-    # ax1_copy.plot(data['Xp'], data['Hsig'],'g', linewidth = 1.5, label = '$H_s$ [m]')
-    # ax1_copy.set_ylabel('$H_s$ [m]',color='g')
-    # ax1_copy.tick_params(labelcolor='g')
-    # t1 = ax1_copy.text(Xpin,Hs_in,f'BC: Hs = {Hs_rand:.2f} m \nIN:  Hs = {Hs_in:.2f} m',color='g',fontweight = 'bold')
-    # t2 = ax1_copy.text(Xpout+10,Hs_out,f'Hs = {Hs_out:.2f} m',color='g',fontweight = 'bold')
-    # t3 = ax1_copy.text(Xp_300+10,Hs_300,f'SWAN2D: Hs = {Hs_300_2d:.2f} m \nSWAN1D: Hs = {Hs_300:.2f} m',color='g',fontweight = 'bold')
-    # t1.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    # t2.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    # t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    # plt.title(f'{scene}\n{simulation}\n HRbasis: Hs = {Hs_basis:.2f} m, Tm10 = {Tm10_basis:.2f}\n L = {Wlen:.0f} m, Hs/D = {Hs_D:.2f}, z_200m_avg = {z_200m_avg:.1f} m')
-    # ax1_copy.legend(loc = 'center right')
-    # ax1_copy.set_ylim(0,np.ceil(Hs_max))
+    ax1_copy.plot(data['Xp'], data['Hsig'],'g', linewidth = 1.5, label = '$H_s$ [m]')
+    ax1_copy.set_ylabel('$H_s$ [m]',color='g')
+    ax1_copy.tick_params(labelcolor='g')
+    t1 = ax1_copy.text(Xpin,Hs_in,f'BC: Hs = {Hs_rand:.2f} m \nIN:  Hs = {Hs_in:.2f} m',color='g',fontweight = 'bold')
+    t2 = ax1_copy.text(Xpout+10,Hs_out,f'Hs = {Hs_out:.2f} m',color='g',fontweight = 'bold')
+    t3 = ax1_copy.text(Xp_300+10,Hs_300,f'SWAN2D: Hs = {Hs_300_2d:.2f} m \nSWAN1D: Hs = {Hs_300:.2f} m',color='g',fontweight = 'bold')
+    t1.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+    t2.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+    t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+    plt.title(f'{scene}\n{simulation}\n HRbasis: Hs = {Hs_basis:.2f} m, Tm10 = {Tm10_basis:.2f}\n L = {Wlen:.0f} m, Hs/D = {Hs_D:.2f}, z_200m_avg = {z_200m_avg:.1f} m')
+    ax1_copy.legend(loc = 'center right')
+    ax1_copy.set_ylim(0,np.ceil(Hs_max))
     
-    # ax2 = plt.subplot(2,1,2)
-    # ax2_copy = ax2.twinx()
-    # ax2.plot(data['Xp'],-data['Botlev'],'k', linewidth = 3, label = 'bodem')
-    # ax2.plot(data['Xp'], data['Watlev'], 'b-', linewidth = 1.5, label = 'waterstand')
-    # ax2.axvline(x = Xpteen, color = 'k', linestyle='--', label = 'teen')
-    # ax2.axvline(x = Xpout, color = 'r', linestyle='--', label = 'teen + 1/2*L')
-    # ax2.axvline(x = Xp_300, color = 'tab:orange', linestyle='--', label = 'teen + 300m')
-    # # ax2.axvline(x = Xp_basis, color = 'y', linestyle='--', label = 'HRbasis')
-    # ax2.set_ylabel('hoogte [m+NAP]')
-    # ax2.set_xlabel('afstand [m]')
-    # ax2.legend(loc = 'lower right')
-    # # ax2.set_xlim(30,100)
-    # # ax2.set_ylim(-20,10)
+    ax2 = plt.subplot(2,1,2)
+    ax2_copy = ax2.twinx()
+    ax2.plot(data['Xp'],-data['Botlev'],'k', linewidth = 3, label = 'bodem')
+    ax2.plot(data['Xp'], data['Watlev'], 'b-', linewidth = 1.5, label = 'waterstand')
+    ax2.axvline(x = Xpteen, color = 'k', linestyle='--', label = 'teen')
+    ax2.axvline(x = Xpout, color = 'r', linestyle='--', label = 'teen + 1/2*L')
+    ax2.axvline(x = Xp_300, color = 'tab:orange', linestyle='--', label = 'teen + 300m')
+    # ax2.axvline(x = Xp_basis, color = 'y', linestyle='--', label = 'HRbasis')
+    ax2.set_ylabel('hoogte [m+NAP]')
+    ax2.set_xlabel('afstand [m]')
+    ax2.legend(loc = 'lower right')
+    # ax2.set_xlim(30,100)
+    # ax2.set_ylim(-20,10)
 
-    # # ax2_copy.plot(data['Xp'], data['Tm_10'],color='orange')
-    # ax2_copy.plot(data['Xp'], data['Tm_10'],'m', linewidth = 1.5,label = '$T_m-1,0$ [m]')
-    # ax2_copy.set_ylabel('$H_s$ [m]',color='m')
-    # ax2_copy.tick_params(labelcolor='m')
-    # t3 = ax2_copy.text(Xpin,Tm10_in,f'BC: Tp = {Tp_rand:.2f} s \nIN:  Tp = {Tp_in:.2f} s',color='m',fontweight = 'bold')
-    # t4 = ax2_copy.text(Xpout+10,Tm10_out,f'Tm_10 = {Tm10_out:.2f} s',color='m',fontweight = 'bold')
-    # t5 = ax2_copy.text(Xp_300+10,Tm10_300,f'SWAN2D: Tm_10 = {Tm10_300_2d:.2f} s \nSWAN1D: Tm_10 = {Tm10_300:.2f} s',color='m',fontweight = 'bold')
-    # t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    # t4.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    # t5.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    # ax2_copy.set_ylabel('$T_{m-1.0}$ [s]')
-    # ax2_copy.legend(loc = 'center right')
-    # ax2_copy.set_ylim(0,np.ceil(Tm10_max))
+    # ax2_copy.plot(data['Xp'], data['Tm_10'],color='orange')
+    ax2_copy.plot(data['Xp'], data['Tm_10'],'m', linewidth = 1.5,label = '$T_m-1,0$ [m]')
+    ax2_copy.set_ylabel('$H_s$ [m]',color='m')
+    ax2_copy.tick_params(labelcolor='m')
+    t3 = ax2_copy.text(Xpin,Tm10_in,f'BC: Tp = {Tp_rand:.2f} s \nIN:  Tp = {Tp_in:.2f} s',color='m',fontweight = 'bold')
+    t4 = ax2_copy.text(Xpout+10,Tm10_out,f'Tm_10 = {Tm10_out:.2f} s',color='m',fontweight = 'bold')
+    t5 = ax2_copy.text(Xp_300+10,Tm10_300,f'SWAN2D: Tm_10 = {Tm10_300_2d:.2f} s \nSWAN1D: Tm_10 = {Tm10_300:.2f} s',color='m',fontweight = 'bold')
+    t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+    t4.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+    t5.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+    ax2_copy.set_ylabel('$T_{m-1.0}$ [s]')
+    ax2_copy.legend(loc = 'center right')
+    ax2_copy.set_ylim(0,np.ceil(Tm10_max))
        
-    # if save_fig:
-    #     save_name = os.path.join(output_path, scene+'_'+simulation+'.png')
-    #     save_plot.save_plot(fig,save_name,ax = ax1_copy, dx = -0.05)
+    if save_fig:
+        save_name = os.path.join(output_path, scene+'_'+simulation+'.png')
+        save_plot.save_plot(fig,save_name,ax = ax1_copy, dx = -0.05)
 
-    # #%% clear some memory
-    # plt.close('all')
-    # del fig
-    # del data
-    # del ax1, ax1_copy, ax2, ax2_copy, t1, t2, t3, t4, t5
-    # gc.collect()
+    #%% clear some memory
+    plt.close('all')
+    del fig
+    del data
+    del ax1, ax1_copy, ax2, ax2_copy, t1, t2, t3, t4, t5
+    gc.collect()
 
 #%% combine output and export
 output_df = pd.DataFrame(appended_output)
