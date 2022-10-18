@@ -17,7 +17,8 @@ import scipy.interpolate
 #%% Settings
 
 path_locations = r'z:\130991_Systeemanalyse_ZSS\2.Data\GIS_TEMP\okader_fc_hydra_unique_handedit_WS_havens_berm_1d-flag.shp'
-path_ws = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\WS_Westerschelde_04102022_v3.xlsx'
+path_locations = r'D:\Users\BADD\Desktop\KP ZSS\GIS-WZ\okader_fc_hydra_unique_handedit_WZ'
+path_ws = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\WS_Waddenzee_13102022_v2.xlsx'
 
 path_out = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Frequentielijnen'
 
@@ -38,7 +39,7 @@ scenarios = ['Laag_2023_0', 'Laag_2050_25', 'Laag_2100_50', 'Laag_2150_75',
              'Extreem_2023_0', 'Extreem_2050_25', 'Extreem_2100_100', 
              'Extreem_2150_180', 'Extreem_2200_300', 'Zeer extreem_2023_0', 
              'Zeer extreem_2050_50', 'Zeer extreem_2100_200', 
-             'Zeer extreem_2150_350', 'Zeer extreem_2200_500']
+             'Zeer extreem_2150_350', 'Zeer extreem_2200_537']
 
 #%% Import data
 
@@ -103,6 +104,8 @@ for index, row in locations.iterrows():
         
         if '2023' in scenario:
             zss = 0
+        elif '500' in scenario:
+            zss = float(scenario.split('_')[-1])/100 - corr_2023_1995 + 0.37
         else:
             zss = float(scenario.split('_')[-1])/100 - corr_2023_1995
                    
@@ -124,4 +127,4 @@ for index, row in locations.iterrows():
         
 
 if switch_excel:
-    freq_result.to_excel(os.path.join(path_out,'Waterlevel_frequencies_processed_westerschelde.xlsx'), index=False)
+    freq_result.to_excel(os.path.join(path_out,'Waterlevel_frequencies_processed_waddenzee.xlsx'), index=False)

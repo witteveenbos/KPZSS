@@ -14,9 +14,9 @@ from hmtoolbox.WB_basic import save_plot
 #%% Setting
 
 path_input = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Frequentielijnen'
-filename = 'Waterlevel_frequencies_processed_westerschelde_engt2.xlsx'
+filename = 'Waterlevel_frequencies_processed_westerschelde_badd_v2.xlsx'
 
-path_out = path_input
+path_out = r'Z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Frequentielijnen\figures_v2'
 
 H = ['H001', 'H002', 'H003', 'H004', 'H005', 'H006', 'H007', 'H008', 'H009', 'H010',
      'H011', 'H012', 'H013', 'H014', 'H015', 'H016', 'H017', 'H018', 'H019', 'H020', 
