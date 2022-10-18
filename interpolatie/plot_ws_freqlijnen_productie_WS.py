@@ -2,16 +2,22 @@
 """
 Created on Mon Aug 15 13:07:02 2022
 
-@author: ENGT2
-"""
+This is a script to plot the processed waterstandsfrequentielijnen for the Westerschelde
 
+@author: ENGT2
+
+1. Import modules
+2. Set paths and variables
+3. Plot waterstandsfrequentielijnen based on timelines and scenarionames
+"""
+# import modules
 import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from hmtoolbox.WB_basic import save_plot
 
-#%% Setting
+#%% Settings
 
 path_input = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Frequentielijnen'
 filename = 'Waterlevel_frequencies_processed_westerschelde_badd_v2.xlsx'
