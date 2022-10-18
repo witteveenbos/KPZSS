@@ -2,10 +2,15 @@
 """
 Created on Tue Oct  4 08:20:33 2022
 
+This is a script to interpolate de waterstandsfrequentielijnen for the Westerschelde
+
 @author: ENGT2
+
+
+
 """
 
-#%% Modules
+#%% import modules
 
 import os
 import geopandas as gpd
@@ -27,7 +32,7 @@ switch_plot = False
 
 corr_2023_1995 = 0.05
 
-# Frequencies to extrapolate
+# Frequencies to extrapolate and names of scenarios
 freqs = [1/10, 1/30, 1/42, 1/50, 1/100, 1/300, 1/417, 1/500, 1/833, 1/1000, 
          1/1250, 1/2500, 1/3000, 1/4167, 1/5000, 1/8333, 1/10000, 1/12500, 
          1/25000, 1/30000, 1/37500, 1/41667, 1/50000, 1/83333, 1/1.00E+05,
@@ -70,6 +75,16 @@ freq_result = pd.DataFrame({'vakid': [], 'werkmap': [], 'database': [],
                           'H028': [], 'F029': [], 'H029': []})
 
 def interpolate(x, x_interpolate, y_interpolate):
+    """
+    required input:
+        x               : x-values where interpolation is needed
+        x_interpolate   : list of x-values
+        y_interpoldate  : list of y-values at x-value locations
+
+    output:
+        y               : 1D linear interpolated y-values at x locations
+    """
+
     interp = scipy.interpolate.interp1d(x_interpolate, y_interpolate, fill_value="extrapolate")
     return np.round(interp(np.log10(x)), 3)
 
@@ -79,6 +94,7 @@ for index, row in locations.iterrows():
     hydraulic = df_water[df_water.Locatie==row.Name]
     # if len(location) > 1:
     #     print(f'Error at row {index}')
+
     for scenario in scenarios:
         data = {}
         data['werkmap'] = 'werkmap'
@@ -93,22 +109,17 @@ for index, row in locations.iterrows():
         data['profiel'] = '-'
         data['berekening'] = scenario
         
-        # break
-        
-        
         # Create prob's and wl (correct for sealevel rise (in cm))
         x_interpolate = list(reversed(sorted((1/hydraulic.iloc[:,9]).tolist())))
         x_log_interpolate = np.log10(x_interpolate)
 
-        # break
-        
+        # Correct sealevel rise for 2023-1995 correction        
         if '2023' in scenario:
             zss = 0
-        elif '500' in scenario:
-            zss = float(scenario.split('_')[-1])/100 - corr_2023_1995 + 0.37
         else:
             zss = float(scenario.split('_')[-1])/100 - corr_2023_1995
-                   
+
+        # Interpolation at different frequencies           
         y_interpolate = sorted((hydraulic.iloc[:,10] + float(scenario.split('_')[-1])/100).tolist())
         x = []
         y = []
