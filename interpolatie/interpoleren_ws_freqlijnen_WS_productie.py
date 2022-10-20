@@ -1,16 +1,31 @@
 # -*- coding: utf-8 -*-
 """
+--- Synopsis --- 
+This scripts interpolates water level frequency lines using input from Hydra-NL.
+
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+
+--- Version --- 
 Created on Tue Oct  4 08:20:33 2022
+@author: ESB
+Project: KP ZSS (130991)
+Script name: Sinterpoleren_ws_freqlijnen_WS_productie.py 
 
-This is a script to interpolate de waterstandsfrequentielijnen for the Westerschelde
+--- Revision --- 
+Status: Unverified 
 
-@author: ENGT2
-
-
-
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
 
-#%% import modules
+#%% Modules
 
 import os
 import geopandas as gpd
@@ -21,30 +36,35 @@ import scipy.interpolate
 
 #%% Settings
 
+# Shapefile with info from fragility curves for each okader vak
 path_locations = r'z:\130991_Systeemanalyse_ZSS\2.Data\GIS_TEMP\okader_fc_hydra_unique_handedit_WS_havens_berm_1d-flag.shp'
-path_locations = r'D:\Users\BADD\Desktop\KP ZSS\GIS-WZ\okader_fc_hydra_unique_handedit_WZ'
-path_ws = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\WS_Waddenzee_13102022_v2.xlsx'
+
+# Output of Hydra-Nl water level calculations
+path_ws = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\WS_Westerschelde_04102022_v3.xlsx'
 
 path_out = r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_WS\Frequentielijnen'
 
-switch_excel = True
-switch_plot = False
-
+# Correction for sea-level-rise between 1995 and 2023
 corr_2023_1995 = 0.05
 
-# Frequencies to extrapolate and names of scenarios
+# Frequencies to inter/extrapolate
 freqs = [1/10, 1/30, 1/42, 1/50, 1/100, 1/300, 1/417, 1/500, 1/833, 1/1000, 
          1/1250, 1/2500, 1/3000, 1/4167, 1/5000, 1/8333, 1/10000, 1/12500, 
          1/25000, 1/30000, 1/37500, 1/41667, 1/50000, 1/83333, 1/1.00E+05,
          8.00E-06, 4.00E-06, 1.20E-06, 1.20E-07]
 
+# Names of scenario's (matching with Hydra-NL output)
 scenarios = ['Laag_2023_0', 'Laag_2050_25', 'Laag_2100_50', 'Laag_2150_75', 
              'Laag_2200_100', 'Gematigd_2023_0', 'Gematigd_2050_25', 
              'Gematigd_2100_75', 'Gematigd_2150_131', 'Gematigd_2200_200', 
              'Extreem_2023_0', 'Extreem_2050_25', 'Extreem_2100_100', 
              'Extreem_2150_180', 'Extreem_2200_300', 'Zeer extreem_2023_0', 
              'Zeer extreem_2050_50', 'Zeer extreem_2100_200', 
-             'Zeer extreem_2150_350', 'Zeer extreem_2200_537']
+             'Zeer extreem_2150_350', 'Zeer extreem_2200_500']
+
+# switches to save output
+switch_excel = True
+switch_plot = False
 
 #%% Import data
 
@@ -75,16 +95,6 @@ freq_result = pd.DataFrame({'vakid': [], 'werkmap': [], 'database': [],
                           'H028': [], 'F029': [], 'H029': []})
 
 def interpolate(x, x_interpolate, y_interpolate):
-    """
-    required input:
-        x               : x-values where interpolation is needed
-        x_interpolate   : list of x-values
-        y_interpoldate  : list of y-values at x-value locations
-
-    output:
-        y               : 1D linear interpolated y-values at x locations
-    """
-
     interp = scipy.interpolate.interp1d(x_interpolate, y_interpolate, fill_value="extrapolate")
     return np.round(interp(np.log10(x)), 3)
 
@@ -94,7 +104,6 @@ for index, row in locations.iterrows():
     hydraulic = df_water[df_water.Locatie==row.Name]
     # if len(location) > 1:
     #     print(f'Error at row {index}')
-
     for scenario in scenarios:
         data = {}
         data['werkmap'] = 'werkmap'
@@ -109,17 +118,20 @@ for index, row in locations.iterrows():
         data['profiel'] = '-'
         data['berekening'] = scenario
         
+        # break
+        
+        
         # Create prob's and wl (correct for sealevel rise (in cm))
         x_interpolate = list(reversed(sorted((1/hydraulic.iloc[:,9]).tolist())))
         x_log_interpolate = np.log10(x_interpolate)
 
-        # Correct sealevel rise for 2023-1995 correction        
+        # break
+        
         if '2023' in scenario:
             zss = 0
         else:
             zss = float(scenario.split('_')[-1])/100 - corr_2023_1995
-
-        # Interpolation at different frequencies           
+                   
         y_interpolate = sorted((hydraulic.iloc[:,10] + float(scenario.split('_')[-1])/100).tolist())
         x = []
         y = []
@@ -138,4 +150,4 @@ for index, row in locations.iterrows():
         
 
 if switch_excel:
-    freq_result.to_excel(os.path.join(path_out,'Waterlevel_frequencies_processed_waddenzee.xlsx'), index=False)
+    freq_result.to_excel(os.path.join(path_out,'Waterlevel_frequencies_processed_westerschelde.xlsx'), index=False)

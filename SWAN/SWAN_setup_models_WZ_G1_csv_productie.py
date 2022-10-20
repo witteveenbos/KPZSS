@@ -1,11 +1,31 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 28 15:35:37 2022
+--- Synopsis --- 
+This scripts generates SWAN2D runs for the Waddenzee (G1 domain) for specified scenarios.
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+
+--- Version --- 
+Created on Thu Jul 28 15:35:37 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: SWAN_setup_models_WZ_G1_csv_productie.py
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
 
-# load modules
+#%% Load modules
 
 import os
 import sys
@@ -20,21 +40,21 @@ from SWAN import interp_offshore_waves
 
 #%% Settings
 
-dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G1_01_zeegat',
-        'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\_bodem\G1_01_zeegat',
-        'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\_rooster',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\input',
-        'golfrand': r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\_randvoorwaarden'}
+dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\serie_01\G1',
+        'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\_bodem\G1',
+        'grid':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\_rooster',
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\serie_01\input',
+        'golfrand': r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\_rvw'}
 
-files = {'swan_templ':  'template_G1_01_zeegat.swn',
+files = {'swan_templ':  'template_G1.swn',
          'qsub_templ':  'dummy.qsub',
-         'scen_xlsx':   'scenarios_SWAN_2D_WZ_v01_zeegat.xlsx',
-         'hyd_output':  'hydra_output_totaal_dsn_mod.csv',
+         'scen_xlsx':   'scenarios_SWAN_2D_WZ_v02.xlsx',
+         'ips':         'IP_binning_WZ_KPZSS_2023_Referentie.xlsx',
          'grid':        'WADOUT1A.GRD',
-         'diepwaterrandvoorwaarden': 'HKV2010_diepwaterrandvoorwaarden.xlsx',
-         'locaties':    'selectie_ill_pilot_v03_WZ.shp'}
+         'diepwaterrandvoorwaarden': 'HKV2010_diepwaterrandvoorwaarden.xlsx'}
 
-node    = 'galatea'
+# qsub settings
+node    = 'despina'
 ppn     = 4
 
 #%% Read scenario input
@@ -42,21 +62,10 @@ ppn     = 4
 xl_scen = pd.ExcelFile(os.path.join(dirs['input'],files['scen_xlsx']),engine='openpyxl')
 df_scen = xl_scen.parse()
 
-#%% Read Hydra-NL output
+#%% Read illustratiepunten (wind and water level) input
 
-df_hyd  = pd.read_csv(os.path.join(dirs['input'],files['hyd_output']), sep=';',
-                      dtype={'ZSS-scenario':str,
-                             'Zeewaterstand [m+NAP]':np.float32,
-                             'windsnelheid [m/s]': np.float32,
-                             'windrichting [graden N]': np.float32})
-
-#%% Read locaties (OKADER vak id's)
-
-df_locs = geopandas.read_file(os.path.join(dirs['input'],files['locaties']))
-
-#%% Filter Hydra-NL output for pilot locaties
-
-df_hyd_pilot = pd.merge(df_hyd,df_locs, left_on = 'OKADER VakId', right_on = 'VakId')
+df_ips_prod = pd.ExcelFile(os.path.join(dirs['input'],files['ips']),engine='openpyxl')
+df_ips_prod = df_ips_prod.parse()
 
 #%% Read diepwaterrandvoorwaarden
 
@@ -67,6 +76,17 @@ df_golfran_SON = xl_golfrand.parse(sheet_name = 'SON',skiprows=1).drop([0,1])
 # loop over scenario's
 
 for ss in range(len(df_scen)):
+   
+    # change machine in qsub depending on scenario
+    if ss <= 5:
+        node    = 'despina'
+        ppn     = 4
+    elif 5 < ss <= 10:
+        node    = 'despina'
+        ppn     = 4
+    elif 10 < ss <= 15:
+        node    = 'despina'
+        ppn     = 4      
     
     # make scenario directory
     dir_scen = os.path.join(dirs['main'], str(df_scen.Naam[ss]))
@@ -78,20 +98,19 @@ for ss in range(len(df_scen)):
     bot     = df_scen.Bodem[ss]+'.bot'
     scenid  = df_scen.Naam[ss]
     zss     = df_scen.ZSS[ss]
+       
+    # Loop over conditions
     
-    # filter on ZSS
-    is_scen =  df_hyd_pilot['ZSS-scenario']==df_scen.ZSS_scenario[ss]
-    df_hyd_scen = df_hyd_pilot[is_scen]
-    
-    # Loop over conditions/locations
-    
-    for cc, row in df_hyd_scen.iterrows():
-        wl          = df_hyd_scen['Zeewaterstand [m+NAP]'][cc]
-        ws          = df_hyd_scen['windsnelheid [m/s]'][cc]
-        wd          = df_hyd_scen['windrichting [graden N]'][cc]
+    for cc, row in df_ips_prod.iterrows():
+        wl          = df_ips_prod['h_mean'][cc] + zss
+        ws          = df_ips_prod['ws_mean'][cc]
+        wd          = df_ips_prod['wdir'][cc]
         
-        # determine offshore wave boundary      
-        locid       = str(df_hyd_scen['OKADER VakId'][cc])           
+        ### Determine offshore wave boundary
+        # Input is a transformation table in Excel from:
+        # HKV (2010) Diepwaterrandvoorwaarden WTI-2011 (ELD, EUR, YM6, SCW en SON). Kenmerk: PR1759.10
+        ###
+        locid       = '%03d' % cc         
         savename_ELD    = os.path.join(dir_scen, locid + '_ELD_wave_conditions.png')
         savename_SON    = os.path.join(dir_scen, locid + '_SON_wave_conditions.png')
         Hs_offshore_ELD, Tp_offshore_ELD, fig = interp_offshore_waves.interp_offshore_waves(df_golfran_ELD, wd, ws, savename_ELD)
@@ -129,16 +148,12 @@ for ss in range(len(df_scen)):
         
         gamma       = 3.3 # default for all boundary conditions
         
-        # conid       = "WZ%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_eld, tp_eld, dirw_eld)
-        conid       = "WS%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_eld, tp_eld, dirw_eld)
+        conid       = "WZ%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_eld, tp_eld, dirw_eld)
+        # conid       = "WS%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd, hs_eld, tp_eld, dirw_eld)
         runid       = 'ID' + locid + '_' + conid
         swan_out    = runid + '.swn'
         qsub_out    = runid + '.qsub'
-        
-        #
-        # FILTERING NEEDS TO BE DONE ON WAVE CONDITIONS, REMOVE DUBPLICATE CONDITIONS
-        #
-        
+               
         # make scenario directory
         dir_run = os.path.join(dir_scen, runid)
         if not os.path.exists(dir_run):

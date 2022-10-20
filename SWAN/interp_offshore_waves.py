@@ -1,8 +1,28 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug  9 08:43:31 2022
+--- Synopsis --- 
+This scripts computes Hs, Tp and Dir offshore based on windspeed and wind direction, using linear inter/extrapolation.
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+
+--- Version --- 
+Created on Tue Aug  9 08:43:31 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: interp_offshore_waves.py
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
 
 import matplotlib.pyplot as plt
@@ -17,13 +37,17 @@ def interp_offshore_waves(df_offshore, windrichting, windsnelheid, savename):
 
     Parameters
     ----------
-    df_offshore : TYPE
-        DESCRIPTION.
-    windrichting : TYPE
-        DESCRIPTION.
-    windsnelheid : TYPE
-        DESCRIPTION.
-    savename : TYPE
+    df_offshore : Dataframe
+        Transformation matrix with the following parameters:
+            Windrichting
+            Golfperiode Tp
+            Golfhoogte
+    windrichting : float
+        wind direction for which offshore wave conditions need to be determined
+        assumption is that wave and wind direction are equal
+    windsnelheid : float
+        wind speed for which offshore wave conditions need to be determined
+    savename : string
         DESCRIPTION.
 
     Returns

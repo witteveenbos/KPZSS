@@ -1,46 +1,77 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Oct  3 16:43:04 2022
+--- Synopsis --- 
+This scripts combines the results of SWAN2D and SWAN1D runs for the Westerschelde.
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+    Script to write SWAN1D output to Excel: read_SWAN_1D_model_WS_iteratie_productie.py
+    Script to write SWAN2D output to Excel: SWAN_2D_output_to_xlsx_WS_productie.py
+
+--- Version --- 
+Created on Mon Oct  3 16:43:04 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: combine_results_SWAN_2D_1D_WS_productie.py 
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
+
+#%% Import modules
 
 import os
 import pandas as pd
 import geopandas as gp
 import numpy as np
 
-# paths
+#%% Settings
 
+# SWAN 2D output
 path_output_2d      = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\03_productiesommen\serie_01\output_productie_SWAN2D_WS.xlsx'
 
+# SWAN 1D output
 path_output_1d      = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\iter_03\output_productie_SWAN1D_WS.xlsx'
 
+# Shapefile with info for each okader vak, minimal info: 
+#   VakId (int): okader vakid
+#   1D (1/0): switch to use 1D results (y/n)
+#   harbour (boolean): switch to interpret as harbour (y/n)
+#   D: average bed level in harbour (float), only applies if harbour = True
 path_shape_vakken   = r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode\shape + 1d-flag\okader_fc_hydra_unique_handedit_WS_havens_berm_1d-flag.shp'
 
+# Path to save output
 path_output = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WS'
 
+# Output location to use in SWAN2D output files
 outloc = 'HRbasis'
 
+# Switch to save results to Excel
 save_excel = True
 
-#%% read data
+#%% Read data
 
+# SWAN2D output
 xl_2d  = pd.ExcelFile(path_output_2d,engine='openpyxl')
 df_2d = xl_2d.parse(outloc)
 
+# SWAN1D ouput
 xl_1d  = pd.ExcelFile(path_output_1d,engine='openpyxl')
 df_1d = xl_1d.parse()
 
+# info on which output to use for each okader vak
 df_vakken = gp.read_file(path_shape_vakken)
 
-#%% combine 2D and 1D results
-
-##########
-#
-# !!Take wave direction from SWAN 2D at HRbasis!!
-#
-######
+#%% Combine 2D and 1D results
 
 appended_data = []
 
@@ -184,7 +215,7 @@ for OKid in OKids:
         # append data
         appended_data.append(output)
     
-#%% convert to dataframe
+#%% convert to dataframe and export to Excel
 
 output_df = pd.DataFrame(appended_data)
 

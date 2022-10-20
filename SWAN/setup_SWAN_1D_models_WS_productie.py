@@ -1,11 +1,31 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Sep 27 12:32:23 2022
+--- Synopsis --- 
+This scripts generates SWAN1D runs for the Westerschelde for specified scenarios.
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+
+--- Version --- 
+Created on Tue Sep 27 12:32:23 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: setup_SWAN_1D_models_WS_productie.py
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
 
-# load modules
+#%% load modules
 
 import os
 import pandas as pd
@@ -13,7 +33,7 @@ from hmtoolbox.WB_basic import replace_keywords
 from hmtoolbox.WB_basic import deg2uv
 import numpy as np
 
-# Settings
+#%% Settings
 
 dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\iter_01',
         'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\_bodem',
@@ -29,12 +49,12 @@ outloc = 'HRext01'
 node = 'despina'
 ppn = 1
 
-# Read scenario input
+#%% Read scenario input
 
 xl_scen = pd.ExcelFile(os.path.join(dirs['input'],files['scen_xlsx']),engine='openpyxl')
 df_scen = xl_scen.parse()
 
-# Read SWAN 2D output
+#%% Read SWAN 2D output
 
 xl_input  = pd.ExcelFile(os.path.join(dirs['input'],files['swan_output']),engine='openpyxl')
 df_input = xl_input.parse(sheet_name = outloc)
@@ -43,7 +63,7 @@ prof_not_found = []
 
 profile_info = []
 
-# loop over scenario's
+#%% loop over scenario's
 
 for ss in range(len(df_scen)):
        

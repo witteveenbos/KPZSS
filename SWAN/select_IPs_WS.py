@@ -15,13 +15,14 @@ import matplotlib
 import matplotlib.pyplot as plt
 # %matplotlib qt
 from hmtoolbox.WB_basic import save_plot
+from hmtoolbox.WB_basic import save_plot_mod
 
 #%% settings
 
 dirs = {'input':    r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_HBN',
-        'output':   r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_HBN'}
+        'output':   r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\03_productiesommen\serie_01\input'}
 
-files = {'hyd_output':  'Waddenzee_HBN_v3.csv'}
+files = {'hyd_output':  'Westerschelde_HBN_v3.csv'}
 
 # scenarios = df_hyd['ZSS-scenario'].unique()
 scenarios = ["'KPZSS_2023_Referentie'", 
@@ -31,7 +32,7 @@ scenarios = ["'KPZSS_2023_Referentie'",
 save_excel  = False
 save_fig    = False
 
-scenario_sel = scenarios[6]
+scenario_sel = scenarios[0]
 
 # set bins
 h_bins = np.array([2,3,4,5,6,7,8,9,10,11,12])
@@ -97,7 +98,7 @@ else:
 if save_fig:
     name = f'output_hydra_vergelijking_ZSS.png'
     fname = os.path.join(dirs['output'],name)
-    save_plot.save_plot(fig_01, fname, incl_wibo = False, dpi = 300, 
+    save_plot_mod.save_plot(fig_01, fname, incl_wibo = False, dpi = 300, 
               change_size = True, figwidth = 14, figheight = 10)
     
 #%% plot IP parameters for specified scenario
@@ -209,7 +210,7 @@ if save_fig:
     namestr = scenario_sel[1:-1]
     name = f'output_hydra_ruimtelijk_{namestr}.png'
     fname = os.path.join(dirs['output'],name)
-    save_plot.save_plot(fig_02, fname, incl_wibo = False, dpi = 300, 
+    save_plot_mod.save_plot(fig_02, fname, incl_wibo = False, dpi = 300, 
               change_size = True, figwidth = 12, figheight = 8)
     
 #%% location plots
@@ -287,7 +288,7 @@ if save_fig:
     namestr = scenario_sel[1:-1]
     name = f'output_hydra_locatie_{namestr}.png'
     fname = os.path.join(dirs['output'],name)
-    save_plot.save_plot(fig_03, fname, incl_wibo = False, dpi = 300, 
+    save_plot_mod.save_plot(fig_03, fname, incl_wibo = False, dpi = 300, 
               change_size = True, figwidth = 12, figheight = 8)
 
 #%% bin IP data for selected scenario
@@ -420,7 +421,7 @@ for direc in wdir_vals:
         namestr = scenario_sel[1:-1]
         name = 'binning_dir_%03d_%s.png' % (direc, namestr)
         fname = os.path.join(dirs['output'],name)
-        save_plot.save_plot(fig, fname, incl_wibo = False, dpi = 300, 
+        save_plot_mod.save_plot(fig, fname, incl_wibo = False, dpi = 300, 
                   change_size = True, figwidth = 12, figheight = 8)
 
 #%% extract data for certain directions

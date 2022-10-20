@@ -1,9 +1,31 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Sep 27 10:54:36 2022
+--- Synopsis --- 
+This scripts generates profiles for SWAN1D runs for the Westerschelde or Waddenzee.
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+
+--- Version --- 
+Created on Tue Sep 27 10:54:36 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: make_1D_profiles_productie.py
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
+
+#%% Import modules
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,6 +43,8 @@ import pandas as pd
 
 from hmtoolbox.WB_topo import interpolate, geometry_funcs
 from hmtoolbox.WB_basic import save_plot
+
+#%% Settings
 
 gebied = 'WS' #'WZ'
 
@@ -68,10 +92,11 @@ else:
 switch_fig = True
 switch_output = True
 
-#%% input data
+# Interpolation settings
 buffer = 100
 spacing = 5
 
+# Max length of 1D profile
 max_len = 600
 
 #%% load shape and make buffer

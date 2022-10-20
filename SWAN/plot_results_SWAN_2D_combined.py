@@ -1,11 +1,32 @@
 # -*- coding: utf-8 -*-
 """
+--- Synopsis --- 
+This script plots the result of SWAN2D output for the Waddenzee for the G1 and G2 output combined
+
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+
+--- Version --- 
 Created on Tue Aug 30 14:25:16 2022
 
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: plot_results_SWAN_2D_combined.py
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
 
-#%% import
+#%% Import modules
 
 import os
 #import matplotlib
@@ -20,21 +41,21 @@ import scipy.io
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import gc
 
-#%% settings
+#%% Settings
 
-path_main_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G1_01'
-path_main_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\01_bodem\G2_01'
+path_main_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G1_01_lim'
+path_main_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G2_01_lim'
 
-save_switch = False
+save_switch = True
 
 figsize = (8,12)
 
 vec_thinning = 40
 
-#%% get directions with output data
+#%% Get directories with output data
 
-dirs_01 = list_files_folders.list_folders(path_main_01, dir_incl='WZ_VM_01_050_F', startswith = True, endswith = False)
-dirs_02 = list_files_folders.list_folders(path_main_02, dir_incl='WZ_VM_01_050_F', startswith = True, endswith = False)
+dirs_01 = list_files_folders.list_folders(path_main_01, dir_incl='WZ_VM_04_300_I', startswith = True, endswith = False)
+dirs_02 = list_files_folders.list_folders(path_main_02, dir_incl='WZ_VM_04_300_I', startswith = True, endswith = False)
 
 if len(dirs_01) == len(dirs_01):
     print('== list of dirs for G1 is the same length as for G2')

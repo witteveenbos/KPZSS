@@ -1,11 +1,32 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Aug 12 10:47:51 2022
+--- Synopsis --- 
+This scripts interpolates HBN values aling various timelines for various scenarios. The interpolation factors are read from an Excel file.
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+    Script to calculate HBN's based on SWAN simulaton output': calculate_dike_height_WS_productie.py
+
+--- Version --- 
+Created on Fri Aug 12 10:47:51 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: interpoleren_hbn_WS_productie.py 
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
 
-#%% Import 
+#%% Import modules
 
 import os
 import pandas as pd
@@ -28,12 +49,16 @@ save_excel      = True
 
 #%% Load input files
 
+# HBN values based on SWAN simulations for specified points along the timelines
 hbn_swan_all = pd.read_excel(files['swan'])
 
+# Results of hydra-NL HBN calculations
 hbn_hydra_all = pd.read_excel(files['hydra'])
 
+# Excel-file with interpolation factors for each timeline for each scenario
 interpolatie = pd.read_excel(files['interpolatie'],sheet_name = 'combined')
 
+# Excel-file with scenario info
 scenarios = pd.read_excel(files['scenarios'],sheet_name = 'combined')
 
 #%% Interpolatie 
