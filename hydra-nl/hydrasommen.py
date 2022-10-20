@@ -2,10 +2,20 @@
 """
 Created on Thu May 14 08:32:24 2020
 
+This is a script to create hydra-nl profiles (.PRFL-files, based on a csv) and the accompanied csv-file used by hydra-nl
+
 @author: BADD
+
+The following steps are done:
+1. Specify:
+   1. Output location
+   2. The location of the csv
+2. Create .PRFL
+3. Create .csv
+
 """
 
-
+# Import modules
 from pathlib import Path
 import csv
 import os
@@ -14,16 +24,16 @@ import numpy as np
 
 
 # Set paths
-profile_dir = Path(r'C:\MyPrograms\Hydra-NL_KP_ZSS\profielen_productie')
+profile_dir = Path(r'C:\MyPrograms\Hydra-NL_KP_ZSS\profielen_productie_WZ')
 os.chdir(profile_dir)
-data_profielen = pandas.read_csv(r'D:\Users\BADD\Desktop\KP ZSS\GIS\new_1309\okader_fc_hydra_overzicht_v2.csv')
+data_profielen = pandas.read_csv(r'D:\Users\BADD\Desktop\KP ZSS\GIS-WZ\okader_fc_hydra_unique_handedit_WZ_v2.csv')
 
-# strip taludhelling van bijvoorbeeld: 1op5 naar 5
+# modify data, for example talud: '1op5' naar 5
 data_profielen['FC_Tld'] = data_profielen['FC_Tld'].str[-1:]
 
 count = 0
 
-# loop over gehele csv om profielen te schrijven    
+# loop over input csv to create profiles    
 for i in range(0,len(data_profielen)):
     count += 1
 
@@ -57,11 +67,11 @@ for i in range(0,len(data_profielen)):
     del file, txt    
         
 
-# loop nogmaals om csv te schrijven waar hydra de info uit haalt
-filecsv = r"D:\Users\BADD\Desktop\KP ZSS\profielen_productie.csv"
+# loop over input csv to create hydra-nl csv to 'call' the profiles
+filecsv = r"D:\Users\BADD\Desktop\KP ZSS\profielen_productie_WZ.csv"
 with open(filecsv, 'w') as f:
     f.write("Locatie;X-coordinaat;Y-coordinaat;Profiel;Directory\n")
 
     for i in range(0,len(data_profielen)):
         f.write(f"{data_profielen['Name'].loc[i]};{data_profielen['XCoordinat'].loc[i]};{data_profielen['YCoordinat'].loc[i]};{data_profielen['VakId'].loc[i]};")
-        f.write("..\\profielen_productie\n")
+        f.write("..\\profielen_productie_WZ\n")

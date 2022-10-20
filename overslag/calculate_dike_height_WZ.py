@@ -2,9 +2,20 @@
 """
 Created on Thu Aug 11 15:14:52 2022
 
+This is a script to calculate the DikeHeight (HBN) based on the overtopping formula for the Waddenzee (pilot)
+
 @author: ESB
+
+1. Import modules
+2. Set paths
+3. Load variables and create new dataframe for output
+4. For every combination of variables the overtopping discharge is calculated
+5. For every combination a DikeHeight is determined
+6. Save excel
+
 """
 
+# import modules
 import os
 import geopandas as gpd
 import pandas as pd
@@ -29,11 +40,13 @@ dikeheight = pd.DataFrame({'OkaderId':[],
 
 for index, combination in combinations.iterrows():
     print(f'Calculating combination {index}')
+
     # Combine with locations (could be multiple)
     vakid = locations[locations['VakId']==combination.OkaderId]
     for location_index in range(len(vakid)):
         location = vakid.iloc[location_index]
-        # Variables for overtopping discharge
+
+        # Variables for overtopping discharge formula
         Hm0 = combination.Hsig
         Tm = combination.Tm_10
         slope = 1/float(location.FC_Tld[-1])
@@ -49,7 +62,8 @@ for index, combination in combinations.iterrows():
             q[i] = overtopping(np.array(Hm0),np.array(Tm),np.array(slope),np.array(RC), 
                         betaw = betaw, yf = yf, yb = yb, yv = yv, 
                         ed = 2007, ctype = 'det')
-            # Stop if overtopping discharge reaches limit
+
+            # Stop if overtopping discharge reaches limit as given in input
             if q[i] > location.FC_q/1000:
                 break
         
