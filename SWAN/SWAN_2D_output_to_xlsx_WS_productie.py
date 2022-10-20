@@ -1,9 +1,31 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Sep 26 09:21:51 2022
+--- Synopsis --- 
+This scripts reads output from SWAN2D runs and writes it to an Excel.
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+
+--- Version --- 
+Created on Mon Sep 26 09:21:51 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: SWAN_2D_output_to_xlsx_WS_productie.py 
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
+
+#%% load modules
 
 import os
 import geopandas as gp
@@ -14,15 +36,22 @@ from hmtoolbox.WB_basic import list_files_folders
 from hmtoolbox.WB_basic import save_plot
 import pandas as pd
 
+#%% Settings
+
+# Location of SWAN2D output
 path_main   = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\03_productiesommen\serie_01'
 dirs        = list_files_folders.list_folders(path_main, dir_incl='WS', startswith = True, endswith = False)
 
+# Shapefile with OKADER vak info (including id and fragility curve info)
 path_OKid_shape = r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode\okader_fc_hydra_unique_handedit_WS_geom.shp'
 
+# Excel file with coupling between illustratiepunten (simulations) and OKADER vakken
 path_coupling = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Westerschelde\03_productiesommen\serie_01\input\IP_OKADER_coupling.xlsx'
 
+# Shapefile with output locations along SWAN 1D profiles
 path_1D_outlocs = r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode\HRD_locations_selectie_WS_300m_interval_OKid.shp'
 
+# Switch to results to Excel
 save_excel = True
 
 #%% Read output for selected locations and export to Excel

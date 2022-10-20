@@ -1,11 +1,32 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 28 15:35:37 2022
+--- Synopsis --- 
+This scripts generates SWAN2D runs for the Westerschelde for specified scenarios.
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+    Determine offshore wave boundary conditions: interp_offshore_waves.py
+
+--- Version --- 
+Created on Mon September 26 08:34:50 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: SWAN_setup_models_WS_csv_productie.py 
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
 
-# load modules
+#%% load modules
 
 import os
 import sys
@@ -36,9 +57,9 @@ files = {'swan_templ':  'template.swn',
          'HRext02':     'HRbasis_WS_Hydra_300m.pnt',
          'HRext03':     'HRbasis_WS_Hydra_600m.pnt',
          'HRext04':     'HRextra_WS.pnt',
-         'diepwaterrandvoorwaarden': 'HKV2010_diepwaterrandvoorwaarden.xlsx',
-         'locaties':    'selectie_ill_pilot_v02_WS.shp'}
+         'diepwaterrandvoorwaarden': 'HKV2010_diepwaterrandvoorwaarden.xlsx'}
 
+# qsub settings
 node    = 'despina'
 ppn     = 4
 
@@ -47,21 +68,7 @@ ppn     = 4
 xl_scen = pd.ExcelFile(os.path.join(dirs['input'],files['scen_xlsx']),engine='openpyxl')
 df_scen = xl_scen.parse()
 
-#%% Read Hydra-NL output
-
-# df_hyd  = pd.read_csv(os.path.join(dirs['input'],files['hyd_output']), sep=';',
-#                       dtype={'ZSS-scenario':str,
-#                              'Zeewaterstand [m+NAP]':np.float32,
-#                              'windsnelheid [m/s]': np.float32,
-#                              'windrichting [graden N]': np.float32})
-
-#%% Read locaties (OKADER vak id's)
-
-# df_locs = geopandas.read_file(os.path.join(dirs['input'],files['locaties']))
-
-#%% Filter Hydra-NL output for pilot locaties
-
-# df_hyd_pilot = pd.merge(df_hyd,df_locs, left_on = 'OKADER VakId', right_on = 'VakId')
+#%% Read illustratiepunten (wind and water level) input
 
 df_ips_prod = pd.ExcelFile(os.path.join(dirs['input'],files['ips']),engine='openpyxl')
 df_ips_prod = df_ips_prod.parse()
@@ -75,6 +82,7 @@ df_golfrand = xl_golfrand.parse(sheet_name = 'SCW',skiprows=1).drop([0,1])
 
 for ss in range(len(df_scen)):
     
+    # change machine in qsub depending on scenario
     if ss <= 5:
         node    = 'despina'
         ppn     = 4
@@ -95,12 +103,8 @@ for ss in range(len(df_scen)):
     bot     = df_scen.Bodem[ss]+'.bot'
     scenid  = df_scen.Naam[ss]
     zss     = df_scen.ZSS[ss]
-    
-    # filter on ZSS
-    # is_scen =  df_hyd_pilot['ZSS-scenario']==df_scen.ZSS_scenario[ss]
-    # df_hyd_scen = df_hyd_pilot[is_scen]
-    
-    # Loop over conditions/locations
+      
+    # Loop over conditions
     
     for cc, row in df_ips_prod.iterrows():
         wl          = df_ips_prod['h_mean'][cc] + zss
@@ -108,7 +112,6 @@ for ss in range(len(df_scen)):
         wd          = df_ips_prod['wdir'][cc]
         
         # determine offshore wave boundary
-        # locid       = str(df_hyd_scen['OKADER VakId'][cc])
         locid       = '%03d' % cc
         savename    = os.path.join(dir_scen, locid + '_wave_conditions.png')
         Hs_offshore, Tp_offshore, fig = interp_offshore_waves.interp_offshore_waves(df_golfrand, wd, ws, savename)
@@ -139,11 +142,7 @@ for ss in range(len(df_scen)):
         runid       = 'ID' + locid + '_' + conid
         swan_out    = runid + '.swn'
         qsub_out    = runid + '.qsub'
-        
-        #
-        # FILTERING NEEDS TO BE DONE ON WAVE CONDITIONS, REMOBE DUBPLICATE CONDITIONS
-        #
-        
+                
         # make scenario directory
         dir_run = os.path.join(dir_scen, runid)
         if not os.path.exists(dir_run):

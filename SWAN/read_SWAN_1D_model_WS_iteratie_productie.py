@@ -1,9 +1,36 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep 29 09:17:28 2022
+--- Synopsis --- 
+This scripts does the following things:
+    - reads output of SWAN1D simulations for Westerschelde
+    - calculates differences between SWAN1D and SWAN2D outputat location 300m from dyke
+    - changes boundary conditions of SWAN1D run based on difference at 300m location
+    - generates input for new SWAN1D run
+    - plots results of SWAN 1D run
 
+--- Remarks --- 
+See also: 
+To-Do: 
+Dependencies: 
+
+--- Version --- 
+Created on Thu Sep 29 09:17:28 2022
 @author: ENGT2
+Project: KP ZSS (130991)
+Script name: read_SWAN_1D_model_WS_iteratie_productie.py 
+
+--- Revision --- 
+Status: Unverified 
+
+Witteveen+Bos Consulting Engineers 
+Leeuwenbrug 8
+P.O. box 233 
+7411 TJ Deventer
+The Netherlands 
+		
 """
+
+#%% Import modules
 
 import os
 import pandas as pd
@@ -15,6 +42,8 @@ from hmtoolbox.WB_basic import save_plot
 import shutil
 # %pylab qt
 import gc
+
+#%% Settings
 
 # main
 path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\iter_03'
@@ -39,27 +68,31 @@ path_new = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_prod
 Xp_300 = 300
 # Xp_basis = 99.8
 
-#%% load tab_file with simulation input
+#%% Load tab_file with simulation input
 
+# Output at locations 'HRext01' (see .swan-file)
 outloc = 'HRext01'
 
 xl_input  = pd.ExcelFile(os.path.join(path_input, file_input),engine='openpyxl')
 df_input = xl_input.parse(sheet_name = outloc)
 
+# Output at locations 'HRbasis' (see .swan-file)
 outloc = 'HRbasis'
 
 xl_basis  = pd.ExcelFile(os.path.join(path_input, file_input),engine='openpyxl')
 df_basis = xl_basis.parse(sheet_name = outloc)
 
+# Excel with info on 1D profiles (orientation)
 xl_profile  = pd.ExcelFile(path_profile_info,engine='openpyxl')
 df_profile  = xl_profile.parse()
 
-#%% loop trough simulations, plot results, prepare input for new simulations
+#%% loop trough SWAN1D simulations, plot results, prepare input for new simulations (new iteration)
 
 appended_output = []
 
-for tab_file in tab_files[1216:1519]:
+for tab_file in tab_files:
     
+    # get relevant names from filename
     scene = tab_file.split('\\')[-3]
     simulation = tab_file.split('\\')[-2]
     loc = simulation.split('_')[0][2:]
@@ -72,6 +105,7 @@ for tab_file in tab_files[1216:1519]:
     if match.any(axis=0) == False:
         print('Warning: no matching ID found in SWAN2D output')
         break
+    # get SWAN2D output at location 300m from dyke
     Hs_300_2d = df_input[match]['Hsig'].iloc[0]
     Tp_300_2d = df_input[match]['TPsmoo'].iloc[0]
     Tm10_300_2d = df_input[match]['Tm_10'].iloc[0]
@@ -97,7 +131,8 @@ for tab_file in tab_files[1216:1519]:
     data['Botlev'][data['Botlev']<-20] = -10
     Wlen = float(data['Lwavp'].iloc[-1])
     
-    #%% Determine location toe of dike
+    #%% Determine location toe of dike (defined as first location where slope > 1/10, as seen from dyke)
+    
     ii = 0
     slope = list()
     Xpteen = data['Xp'].iloc[-1]
@@ -122,13 +157,15 @@ for tab_file in tab_files[1216:1519]:
     # max_slope = max(slope)
     # imax = np.argmax(slope)
     
-    #%% wave parameters at incoming boundary
+    #%% Wave parameters at incoming boundary
+    
     Xpin = data['Xp'].iloc[-1]
     Hs_in = data['Hsig'].iloc[-1]
     Tp_in = data['TPsmoo'].iloc[-1]
     Tm10_in = data['Tm_10'].iloc[-1]
 
     #%% Get output at output location (1/2 wavelength from toe of dike)
+    
     Xpout = float(Xpteen) + Wlen*0.5
     Ypout = 0
     Dep_out = data['Depth'][data['Xp'] >= Xpout].iloc[0]
@@ -136,9 +173,17 @@ for tab_file in tab_files[1216:1519]:
     Tp_out = data['TPsmoo'][data['Xp'] > Xpout].iloc[0]
     Tm10_out = data['Tm_10'][data['Xp'] > Xpout].iloc[0]
     Dir_out_rel = data['Dir'][data['Xp'] >= Xpout].iloc[0]
-       
+    
+    #%% Calculate wave direction (nautical convention)
+    # The 1D profiles in SWAN are all oriëntated from West to East (so along x-axis, 90 degrees nautical)
+    # The wave direction in the SWAN1D output is with respect to the West-East profile
+    # To determine absolute wave directoin (nautical) the wave direction from SWAN needs to be corrected
+    
+    # Read oriëntation of 1D profile
     Dir_profile = df_profile[df_profile['OkaderId']==int(loc)]['dir_profile'].iloc[0]
+    # Determine absolute wave direction (nautical convention)
     Dir_out_abs = Dir_profile + (Dir_out_rel - 90)
+    # Make sure direction is not > 360 or < 0
     if Dir_out_abs >= 360:
         Dir_out_abs = Dir_out_abs - 360
     elif Dir_out_abs < 0:
@@ -146,14 +191,18 @@ for tab_file in tab_files[1216:1519]:
     elif Dir_out_abs < -360:
         Dir_out_abs = 0
 
+    #%% Calculate Hs/D at output location (1/2 wavelength from toe of dike)
+    
     Hs_D = Hs_300_2d / Dep_out
     Hs_decr_rel = (Hs_out - Hs_300_2d) / Hs_300_2d
     
-    # z_200m = -data['Botlev'][data['Xp'] <= 200]
+    #%% Calculate average bed level in first 200m of profile
+    
     z_200m = -data['Botlev'][(data['Xp'] >= Xpteen) & (data['Xp'] <= 200)]
     z_200m_avg = np.mean(z_200m)
            
-    #%% maximum values for ylimits
+    #%% y-limits for plots
+    
     Hs_max = np.nanmax(data['Hsig'])
     Tm10_max = np.nanmax(data['Tm_10'])
     
@@ -161,12 +210,14 @@ for tab_file in tab_files[1216:1519]:
         Hs_max = 0
         Tm10_max = 0
         
-    #%% get output at SWAN 2D location
+    #%% Get SWAN1D output at 300m location
+    
     Hs_300 = data['Hsig'][data['Xp'] >= Xp_300].iloc[0]
     Tp_300 = data['TPsmoo'][data['Xp'] >= Xp_300].iloc[0]
     Tm10_300 = data['Tm_10'][data['Xp'] >= Xp_300].iloc[0]
     Dir_300_rel = data['Dir'][data['Xp'] >= Xp_300].iloc[0]
-       
+    
+    # Make sure direction is not > 360 or < 0
     Dir_300_abs = Dir_profile + (Dir_300_rel - 90)
     if Dir_300_abs >= 360:
         Dir_300_abs = Dir_300_abs - 360
@@ -175,7 +226,7 @@ for tab_file in tab_files[1216:1519]:
     elif Dir_300_abs < -360:
         Dir_300_abs = -999
     
-    #%% now prepare input for new simulations
+    #%% Prepare input for new SWAN 1D simulations (new iteration)
         
     # get swn-file and qsub-file
     swn_file = os.path.join(path_main,scene,simulation,simulation+'.swn')
@@ -194,9 +245,11 @@ for tab_file in tab_files[1216:1519]:
 
     values = line.replace(find_text, '').replace('\n', '').split(' ')
     
+    # wave boundary conditions of previous SWAN 1D run
     Hs_rand = float(values[0])
     Tp_rand = float(values[1])
-           
+    
+    # Difference between SWAN2D and SWAN1D at 300m location       
     if Hs_300_2d <=0 or np.isnan(Hs_300):
         Hs_diff_fac = 1
         Tp_diff_fac = 1
@@ -214,6 +267,7 @@ for tab_file in tab_files[1216:1519]:
         Tm10_diff = Tm10_300_2d - Tm10_300
         Dir_diff = Dir_300_2d - Dir_300_abs
     
+    # new wave boundary conditions for SWAN1D run
     Hs_bc_new = Hs_rand * Hs_diff_fac
     # Tp_bc_new = Tp_rand * Tp_diff_fac
     Tp_bc_new = Tp_rand * Tm10_diff_fac
@@ -223,6 +277,7 @@ for tab_file in tab_files[1216:1519]:
 
     lines[index] = new_line
     
+    # write SWAN1D input
     if new_iteration:
     
         # make new directory
@@ -240,7 +295,8 @@ for tab_file in tab_files[1216:1519]:
         qsub_file_new = os.path.join(path_new,scene,simulation,simulation+'.qsub')
         shutil.copyfile(qsub_file, qsub_file_new) 
     
-    #%% append output    
+    #%% Store output SWAN1D run and comparison with SWAN2D   
+    
     output = {'OkaderId':   int(loc),
               'Scenario':   scene,
               'Dep':        Dep_out,
@@ -260,7 +316,8 @@ for tab_file in tab_files[1216:1519]:
     
     appended_output.append(output)
               
-    #%% plotting
+    #%% Plot results SWAN 1D run and comparison with SWAN2D
+    
     fig = plt.figure(figsize=(12,7))
     ax1 = plt.subplot(2,1,1)
     ax1_copy = ax1.twinx()
@@ -322,14 +379,16 @@ for tab_file in tab_files[1216:1519]:
         save_name = os.path.join(output_path, scene+'_'+simulation+'.png')
         save_plot.save_plot(fig,save_name,ax = ax1_copy, dx = -0.05)
 
-    #%% clear some memory
+    #%% Clear some memory (required when looping over multiple simulations)
+    
     plt.close('all')
     del fig
     del data
     del ax1, ax1_copy, ax2, ax2_copy, t1, t2, t3, t4, t5
     gc.collect()
 
-#%% combine output and export
+#%% Export output to Excel
+
 output_df = pd.DataFrame(appended_output)
 if save_result:
     output_df.to_excel(os.path.join(path_main,'output_productie_SWAN1D_WS.xlsx')) 
