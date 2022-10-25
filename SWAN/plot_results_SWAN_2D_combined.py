@@ -29,8 +29,8 @@ The Netherlands
 #%% Import modules
 
 import os
-#import matplotlib
-#matplotlib.use('agg')
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from hmtoolbox.WB_basic import list_files_folders
@@ -43,8 +43,8 @@ import gc
 
 #%% Settings
 
-path_main_01 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G1_01_lim'
-path_main_02 = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\04_sensitivity\02_refractie\G2_01_lim'
+path_main_01 = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\serie_01\G1'
+path_main_02 = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\serie_01\G2'
 
 save_switch = True
 
@@ -54,8 +54,8 @@ vec_thinning = 40
 
 #%% Get directories with output data
 
-dirs_01 = list_files_folders.list_folders(path_main_01, dir_incl='WZ_VM_04_300_I', startswith = True, endswith = False)
-dirs_02 = list_files_folders.list_folders(path_main_02, dir_incl='WZ_VM_04_300_I', startswith = True, endswith = False)
+dirs_01 = list_files_folders.list_folders(path_main_01, dir_incl='WZ_GM_01_050_A1', startswith = True, endswith = False)
+dirs_02 = list_files_folders.list_folders(path_main_02, dir_incl='WZ_GM_01_050_A1', startswith = True, endswith = False)
 
 if len(dirs_01) == len(dirs_01):
     print('== list of dirs for G1 is the same length as for G2')
@@ -84,12 +84,15 @@ for diri in dirs_01:
                         
         Hsig_01 = mat_01['Hsig'][:,:]
         Tp_01 = mat_01['RTpeak'][:,:]
-        direction_01 = mat_01['Dir'][:,:]
+        # direction_01 = mat_01['Dir'][:,:]
+
+        del mat_01
+        gc.collect()
         
         # Convert the direction to u,v coordinates with scaling Hsig
-        u_01,v_01 = deg2uv.deg2uv(direction_01,intensity=Hsig_01)
+        # u_01,v_01 = deg2uv.deg2uv(direction_01,intensity=Hsig_01)
         
-        #%% Read G2 output
+        # %% Read G2 output
         mat_02 = dict(scipy.io.loadmat(file_02))
         
         # Cut off dummy rows and columns 
@@ -99,10 +102,13 @@ for diri in dirs_01:
                         
         Hsig_02 = mat_02['Hsig'][:,:]
         Tp_02 = mat_02['RTpeak'][:,:]
-        direction_02 = mat_02['Dir'][:,:]
+        # direction_02 = mat_02['Dir'][:,:]
         
         # Convert the direction to u,v coordinates with scaling Hsig
-        u_02,v_02 = deg2uv.deg2uv(direction_02,intensity=Hsig_02)
+        # u_02,v_02 = deg2uv.deg2uv(direction_02,intensity=Hsig_02)
+
+        del mat_02
+        gc.collect()
         
         #%% Plot results
         fig = plt.figure(figsize=figsize)
@@ -132,8 +138,13 @@ for diri in dirs_01:
         cax = divider.append_axes("right", size="5%", pad=0.275)
         plt.colorbar(pcol,cax = cax)
         plt.ylabel('Hsig (m)')
+
+        del Hsig_01
+        del Hsig_02
+        gc.collect()
         
         # Tp
+
         plt.subplot(3,1,2)
         plt.gca().set_aspect('equal')
         pcol = plt.pcolor(Xp_01,Yp_01,Tp_01,cmap='jet')
@@ -158,14 +169,19 @@ for diri in dirs_01:
         cax = divider.append_axes("right", size="5%", pad=0.275)
         plt.colorbar(pcol,cax = cax)
         plt.ylabel('Tp (s)')
+
+        del Tp_01
+        del Tp_02
+        gc.collect()
         
         # Depth
+
         plt.subplot(3,1,3)
         plt.gca().set_aspect('equal')
         pcol = plt.pcolor(Xp_01,Yp_01,Botlev_01,cmap='jet')
         plt.clim(vmin=-30, vmax=5)
         pcol = plt.pcolor(Xp_02,Yp_02,Botlev_02,cmap='jet')
-        plt.clim(vmin=-30, vmax=5)
+        # plt.clim(vmin=-30, vmax=5)
         
         plt.xlabel('x-coordinate [m]')
         plt.ylabel('y-coordinate [m]')
@@ -179,6 +195,11 @@ for diri in dirs_01:
         cax = divider.append_axes("right", size="5%", pad=0.275)
         plt.colorbar(pcol,cax = cax)
         plt.ylabel('Water depth (m)')
+
+        del Botlev_01
+        del Botlev_02
+        gc.collect()
+
         
         #%% Save figure
         if save_switch:
@@ -188,4 +209,7 @@ for diri in dirs_01:
         #plt.close('all')
         #del fig
         print('End at {} doing stuff'.format(datetime.datetime.now()))
+
+        plt.close('all')
         gc.collect()
+        break
