@@ -16,6 +16,8 @@ import scipy.io
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+from shapely.geometry import Point
+from shapely import affinity
 from scipy.io import loadmat
 from raster2xyz.raster2xyz import Raster2xyz
 import matplotlib.pyplot as plt
@@ -45,25 +47,26 @@ if gebied == 'WS':
     
 elif gebied == 'WZ':
     base_path = r'z:\130991_Systeemanalyse_ZSS\2.Data\bathy\Final\WZ'
-    scene_dict = {'WZ_NM_RF' : base_path+'\\Niet meegroeien\\0m = base_minimum_bathymetry\\Volledig_meegroeien_minimumbathy_0m_v6.mat'}
-                #   'WZ_GM_A1' : base_path+'\\Gedeeltelijk meegroeien\\A-1 Gunstig_05m_Elev_meanBedChange_GW\\Gunstig_0.5m_Elev_meanBedChange_inclED_v6.mat',
-                #   'WZ_GM_B1' : base_path+'\\Gedeeltelijk meegroeien\\B-1 Gunstig_10m_Elev_meanBedChange_GW\\Gunstig_1.0m_Elev_meanBedChange_inclED_v6.mat',
-                #   'WZ_GM_C1' : base_path+'\\Gedeeltelijk meegroeien\\C-1 Gunstig_20m_Elev_meanBedChange_GW\\Gunstig_2.0m_Elev_meanBedChange_inclED_v6.mat',
-                #   'WZ_GM_D1' : base_path+'\\Gedeeltelijk meegroeien\\D-1 Gunstig_30m_Elev_meanBedChange_GW\\Gunstig_3.0m_Elev_meanBedChange_inclED_v6.mat',
-                #   'WZ_GM_B2' : base_path+'\\Gedeeltelijk meegroeien\\B-2 Ongunstig_10m_Elev_meanBedChange_GW\\Ongunstig_1.0m_Elev_meanBedChange_inclED_v6.mat',
-                #   'WZ_GM_C2' : base_path+'\\Gedeeltelijk meegroeien\\C-2 Ongunstig_20m_Elev_meanBedChange_GW\\Ongunstig_2.0m_Elev_meanBedChange_inclED_v6.mat',
-                #   'WZ_VM_F' : base_path+'\\Geheel meegroeien\\05m\\Volledig_meegroeien_minimumbathy_05m_v6.mat',
-                #   'WZ_VM_G' : base_path+'\\Geheel meegroeien\\1m\\Volledig_meegroeien_minimumbathy_1m_v6.mat',
-                #   'WZ_VM_H' : base_path+'\\Geheel meegroeien\\2m\\Volledig_meegroeien_minimumbathy_2m_v6.mat',
-                #   'WZ_VM_I' : base_path+'\\Geheel meegroeien\\3m\\Volledig_meegroeien_minimumbathy_3m_v6.mat'}
+    scene_dict = { 'WZ_NM_RF' : base_path+'\\Niet meegroeien\\0m = base_minimum_bathymetry\\Volledig_meegroeien_minimumbathy_0m_v6.mat',
+                  'WZ_GM_A1' : base_path+'\\Gedeeltelijk meegroeien\\A-1 Gunstig_05m_Elev_meanBedChange_GW\\Gunstig_0.5m_Elev_meanBedChange_inclED_v2.mat', 
+                  'WZ_GM_B1' : base_path+'\\Gedeeltelijk meegroeien\\B-1 Gunstig_10m_Elev_meanBedChange_GW\\Gunstig_1.0m_Elev_meanBedChange_inclED.mat',
+                  'WZ_GM_C1' : base_path+'\\Gedeeltelijk meegroeien\\C-1 Gunstig_20m_Elev_meanBedChange_GW\\Gunstig_2.0m_Elev_meanBedChange_inclED.mat',
+                  'WZ_GM_D1' : base_path+'\\Gedeeltelijk meegroeien\\D-1 Gunstig_30m_Elev_meanBedChange_GW\\Gunstig_3.0m_Elev_meanBedChange_inclED.mat',
+                  'WZ_GM_B2' : base_path+'\\Gedeeltelijk meegroeien\\B-2 Ongunstig_10m_Elev_meanBedChange_GW\\Ongunstig_1.0m_Elev_meanBedChange_inclED_V2.mat',
+                  'WZ_GM_C2' : base_path+'\\Gedeeltelijk meegroeien\\C-2 Ongunstig_20m_Elev_meanBedChange_GW\\Ongunstig_2.0m_Elev_meanBedChange_inclED_V2.mat',
+                  'WZ_VM_F' : base_path+'\\Geheel meegroeien\\05m\\Volledig_meegroeien_minimumbathy_05m_v6.mat',
+                  'WZ_VM_G' : base_path+'\\Geheel meegroeien\\1m\\Volledig_meegroeien_minimumbathy_1m_v6.mat',
+                  'WZ_VM_H' : base_path+'\\Geheel meegroeien\\2m\\Volledig_meegroeien_minimumbathy_2m_v6.mat',
+                  'WZ_VM_I' : base_path+'\\Geheel meegroeien\\3m\\Volledig_meegroeien_minimumbathy_3m_v6.mat'}
+    # scene_dict = {'WZ_GM_A1' : base_path+'\\Gedeeltelijk meegroeien\\A-1 Gunstig_05m_Elev_meanBedChange_GW\\Gunstig_0.5m_Elev_meanBedChange_inclED_v2.mat'}
     
 
     path_profiles = r'z:\\130991_Systeemanalyse_ZSS\\2.Data\\GIS_TEMP\\'
     file_profiles = path_profiles+'HRD_locations_selectie_WZ_profielen_extended_no_duplicates.shp'
     ahn_poly = r'D:\Users\BADD\Desktop\KP ZSS\profiles\polygon_ahntiles.shp'
     okader_mid = path_profiles+'okader_fc_hydra_unique_handedit_WZ.shp'
-            
-    save_path = r'D:\Users\BADD\Desktop\Waddenzee\tests\_bodem05'
+    buffer_okader = r'D:\Users\BADD\Desktop\Waddenzee\buffer_okader_150_v2.shp'        
+    save_path = r'D:\Users\BADD\Desktop\Waddenzee\tests\_bodem07'
     
 else:
     raise UserWarning(f'{gebied} does not exist')
@@ -80,6 +83,7 @@ max_len = 600
 #%% load shape and make buffer
 df_shp = gpd.read_file(file_profiles)
 df_okader = gpd.read_file(okader_mid)
+df_okader_buff = gpd.read_file(buffer_okader)
 
 hubnames = df_shp['HubName']
 
@@ -156,7 +160,7 @@ for scene, file in scene_dict.items():
         
         df_xyz = pd.DataFrame({'x':x[ind_inside].ravel(),'y':y[ind_inside].ravel(),'z':z[ind_inside].ravel()})
         df_xyz_ahn = pd.DataFrame({'x':x_ahn[ind_inside_ahn].ravel(),'y':y_ahn[ind_inside_ahn].ravel(),'z':z_ahn[ind_inside_ahn].ravel()})
-        df_xyz = df_xyz.dropna()
+        # df_xyz = df_xyz.dropna()
         df_xyz_ahn = df_xyz_ahn.dropna()
         
         #%% make sure line is oriented the right way
@@ -191,17 +195,52 @@ for scene, file in scene_dict.items():
         df_xy_ahn['z'] = np.zeros_like(df_xy_ahn['x'])
 
 
-        # append the two datasets
-        df_xyz_combi = df_xyz.append(df_xyz_ahn)
-
         #%% drape on xy for bathy and ahn
-        interpolate.interpolate_xyz_on_xy(df_xyz_combi,df_xy)
+        
         interpolate.interpolate_xyz_on_xy(df_xyz_ahn,df_xy_ahn)
 
         # use the first nan of the ahn dataset to create a buffer for interpolation
         buff_data_outside = df_xy_ahn['z'][::-1].notnull().idxmax()
-        if buff_data_outside > 6:
-            df_xy.loc[(buff_data_outside-4):(buff_data_outside+1), 'z'] = np.nan
+
+        # point = Point(df_xy_ahn.loc[buff_data_outside]['x'], df_xy_ahn.loc[buff_data_outside]['y'] )
+        # buff_point = point.buffer(200, cap_style = 3)
+        # rotated_buff = affinity.rotate(buff_point, 360-FC_DN, 'center')
+
+        buffer_del = np.sqrt(2)*50
+        for i in range(len(df_xyz)):
+            
+            if df_xyz['x'][i] < df_xy_ahn.loc[buff_data_outside]['x'] + buffer_del and \
+                df_xyz['x'][i] > df_xy_ahn.loc[buff_data_outside]['x'] - buffer_del and \
+                df_xyz['y'][i] < df_xy_ahn.loc[buff_data_outside]['y'] + buffer_del and \
+                df_xyz['y'][i] > df_xy_ahn.loc[buff_data_outside]['y'] - buffer_del and \
+                df_xyz['z'][i] > df_xy_ahn.loc[buff_data_outside]['z'] - 0.5:
+                    df_xyz['z'][i] = np.nan
+                    # print(f'entry {i} according to all conditions')
+        
+        ref_bodem_loc = f'D:\\Users\\BADD\\Desktop\\Waddenzee\\tests\\_bodem_ref_delta\\{scene}_{hubname}_profile.txt'
+        ref_bodem = pd.read_csv(ref_bodem_loc) 
+        ref_bodem_mean = np.nanmean(ref_bodem['delta_h'][0:buff_data_outside])
+
+        # for j in range(0, buff_data_outside):
+        #     if scene == 'WZ_NM_RF':
+        #         print('Dit is het nulscenario, dus niks doen')
+        #         break
+        #     else:
+        #         if not df_xy['z'][j].isnan():
+        #             df_xy['z'][j] = df_xy['z'][j] + ref_bodem_mean
+        #         if j == 119:
+        #             break        
+        
+        df_xyz_ahn = df_xyz_ahn + ref_bodem_mean
+        df_xyz_combi = df_xyz.append(df_xyz_ahn)
+        df_xyz_combi = df_xyz_combi.dropna()
+        df_xyz_combi = df_xyz_combi.loc[df_xyz_combi['z'] > -25]
+        interpolate.interpolate_xyz_on_xy(df_xyz_combi,df_xy)
+
+        df_xyz = df_xyz.dropna()
+        df_xyz = df_xyz.loc[df_xyz['z'] > -25]
+        # if buff_data_outside > 6:
+        #     df_xy.loc[(buff_data_outside-4):(buff_data_outside+1), 'z'] = np.nan
 
         #%% finish df_xy dataframe
         # limit to last valid index of z
@@ -225,18 +264,19 @@ for scene, file in scene_dict.items():
                 df_xy['zfilled'][ix] = df_xy['zfilled'][nanlist[-1]+1]    
     
         #%% show plot
-        zs = np.concatenate([z_ahn.values[ind_inside_ahn], z[ind_inside]], axis = 0)
-        z_min, z_max = np.nanmin(zs), np.nanmax(zs)
+        zs = np.concatenate([z_ahn.values[ind_inside_ahn], df_xyz['z']], axis = 0)
+        min_, max_ = np.nanmin(zs), np.nanmax(zs)
 
         fig,ax = plt.subplots(1,2,figsize=(16,8))
         fig.patch.set_facecolor('white')
-        
-        s = ax[0].scatter(x_ahn.values[ind_inside_ahn],y_ahn.values[ind_inside_ahn],2,z_ahn.values[ind_inside_ahn],cmap='jet', vmin=z_min, vmax=z_max) 
-        t = ax[0].scatter(x[ind_inside],y[ind_inside],15,z[ind_inside],cmap='jet', edgecolor = 'k', linewidth = 0.2, vmin=z_min, vmax=z_max)
+        # df_shp_buffered.plot(ax = ax[0],color='lightgrey')
+        s = ax[0].scatter(x_ahn.values[ind_inside_ahn],y_ahn.values[ind_inside_ahn],2,z_ahn.values[ind_inside_ahn],cmap='jet', vmin=min_, vmax=max_) 
+        # t = ax[0].scatter(x[ind_inside],y[ind_inside],15,z[ind_inside],cmap='jet', edgecolor = 'k', linewidth = 0.2, vmin=min_, vmax=max_)
+        t = ax[0].scatter(df_xyz['x'], df_xyz['y'], 15, df_xyz['z'], cmap='jet', edgecolor = 'k', linewidth = 0.2, vmin=min_, vmax=max_)
         ax[0].plot(df_xy['x'],df_xy['y'], color = 'k', linewidth = 1)
         
         divider = make_axes_locatable(ax[0])
-        cax = divider.append_axes("right", size=0.15, pad=0.075)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
         fig.colorbar(s, ax=ax[0], cax=cax)
         
         ax[0].set_xlabel('x-coord [m]')
@@ -247,11 +287,10 @@ for scene, file in scene_dict.items():
      
         ax[1].plot(df_xy['distance'],df_xy['z'],label='raw 1D profile bathy')
         ax[1].plot(df_xy['distance'],df_xy['zfilled'],label='interpolated NaNs bathy',zorder=0)
-        ax[1].set_title(f'interpolated 1D bathy+ahn, spacing = {spacing} m, DN = {FC_DN}')
+        ax[1].set_title(f'interpolated 1D bathy+ahn for profile {hubname} in {scene},\n spacing = {spacing} m, DN = {FC_DN} deg, delta_ahn = {ref_bodem_mean:.2f} m')
         ax[1].set_xlabel('distance [m]')
         ax[1].set_ylabel('height [m NAP]')
         ax[1].legend()
-        ax[1].grid(visible=True, which='major', axis='both')
         
         box = ax[1].get_position()
         box.x0 = box.x0 + 0.02
@@ -272,5 +311,6 @@ for scene, file in scene_dict.items():
             
         plt.close('all')
         gc.collect()
+    
         
         

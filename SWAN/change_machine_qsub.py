@@ -14,7 +14,7 @@ import numpy as np
 from hmtoolbox.WB_basic import list_files_folders
 
 # results SWAN 1D
-path_qsubs = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Westerschelde\02_productie\iter_03_temp\WS_VT_06_300_A2'
+path_qsubs = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01'
 qsub_files = list_files_folders.list_files('.qsub',path_qsubs)
 
 newmachinename = 'despina'
@@ -27,7 +27,7 @@ for qsub_file in qsub_files:
         data = file.readlines()
         
         for cnt, line in enumerate(data):
-            if 'nodes' in line and 'naiad' in line and 'ppn' in line:
+            if 'nodes' in line and '1' in line and 'ppn' in line:
                 #do some magic to create a new line
                 newstring = data[cnt][:data[cnt].find('=')+1]+newmachinename+data[cnt][data[cnt].find(':'):]
                 data[cnt] = newstring
