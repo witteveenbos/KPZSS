@@ -226,17 +226,17 @@ for scene, file in scene_dict.items():
     
         #%% show plot
         zs = np.concatenate([z_ahn.values[ind_inside_ahn], z[ind_inside]], axis = 0)
-        min_, max_ = np.nanmin(zs), np.nanmax(zs)
+        z_min, z_max = np.nanmin(zs), np.nanmax(zs)
 
         fig,ax = plt.subplots(1,2,figsize=(16,8))
         fig.patch.set_facecolor('white')
-        # df_shp_buffered.plot(ax = ax[0],color='lightgrey')
-        s = ax[0].scatter(x_ahn.values[ind_inside_ahn],y_ahn.values[ind_inside_ahn],2,z_ahn.values[ind_inside_ahn],cmap='jet', vmin=min_, vmax=max_) 
-        t = ax[0].scatter(x[ind_inside],y[ind_inside],15,z[ind_inside],cmap='jet', edgecolor = 'k', linewidth = 0.2, vmin=min_, vmax=max_)
+        
+        s = ax[0].scatter(x_ahn.values[ind_inside_ahn],y_ahn.values[ind_inside_ahn],2,z_ahn.values[ind_inside_ahn],cmap='jet', vmin=z_min, vmax=z_max) 
+        t = ax[0].scatter(x[ind_inside],y[ind_inside],15,z[ind_inside],cmap='jet', edgecolor = 'k', linewidth = 0.2, vmin=z_min, vmax=z_max)
         ax[0].plot(df_xy['x'],df_xy['y'], color = 'k', linewidth = 1)
         
         divider = make_axes_locatable(ax[0])
-        cax = divider.append_axes("right", size="5%", pad=0.05)
+        cax = divider.append_axes("right", size=0.15, pad=0.075)
         fig.colorbar(s, ax=ax[0], cax=cax)
         
         ax[0].set_xlabel('x-coord [m]')
@@ -251,6 +251,7 @@ for scene, file in scene_dict.items():
         ax[1].set_xlabel('distance [m]')
         ax[1].set_ylabel('height [m NAP]')
         ax[1].legend()
+        ax[1].grid(visible=True, which='major', axis='both')
         
         box = ax[1].get_position()
         box.x0 = box.x0 + 0.02

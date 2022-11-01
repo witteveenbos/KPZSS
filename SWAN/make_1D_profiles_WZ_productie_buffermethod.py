@@ -57,19 +57,21 @@ elif gebied == 'WZ':
                 #   'WZ_VM_I' : base_path+'\\Geheel meegroeien\\3m\\Volledig_meegroeien_minimumbathy_3m_v6.mat'}
     
 
-    path_profiles = r'z:\\130991_Systeemanalyse_ZSS\\2.Data\\GIS_TEMP\\'
-    file_profiles = path_profiles+'HRD_locations_selectie_WZ_profielen_extended_no_duplicates.shp'
-    ahn_poly = r'D:\Users\BADD\Desktop\KP ZSS\profiles\polygon_ahntiles.shp'
-    okader_mid = path_profiles+'okader_fc_hydra_unique_handedit_WZ.shp'
+    path_profiles       = r'z:\130991_Systeemanalyse_ZSS\2.Data\GIS_TEMP'
+    file_profiles       = path_profiles+'\HRD_locations_selectie_WZ_profielen_extended_no_duplicates.shp'
+    ahn_poly            = r'z:\130991_Systeemanalyse_ZSS\2.Data\GIS_TEMP\polygon_ahntiles.shp'
+    okader_mid          = path_profiles+'\okader_fc_hydra_unique_handedit_WZ.shp'
+    path_ahn_rasters    = r'z:\130991_Systeemanalyse_ZSS\2.Data\profiles_ahn_deltares\ahn_tiles'
+    path_ahn_csv        = r'z:\130991_Systeemanalyse_ZSS\2.Data\ahn-csv'
             
-    save_path = r'D:\Users\BADD\Desktop\Waddenzee\tests\_bodem02a'
+    save_path = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\tests\_bodem05'
     
 else:
     raise UserWarning(f'{gebied} does not exist')
     
     
-switch_fig = True
-switch_output = True
+switch_fig = False
+switch_output = False
 
 #%% input data
 buffer = 100
@@ -135,13 +137,14 @@ for scene, file in scene_dict.items():
             df_ahn_check = df_ahn[df_ahn.contains(df_okader_buf[0])]['layer']
             
         print(f'Profile of okadervak {hubname}, is located in {df_ahn_check.iloc[0]}')
-        input_raster = 'D:\\Users\\BADD\\Desktop\\KP ZSS\\profiles\\AHN-WZ\\qgis\\'+ df_ahn_check.iloc[0]   
-        out_csv = 'D:\\Users\\BADD\\Desktop\\KP ZSS\\profiles\\AHN-WZ\\ahn-csv\\' + df_ahn_check.iloc[0] + '.csv'
+        input_raster = path_ahn_rasters + df_ahn_check.iloc[0]   
+        out_csv = path_ahn_csv + df_ahn_check.iloc[0] + '.csv'
 
-        # transform .tif file to a format which is workable in python
-        if not os.path.exists(out_csv):
-            rtxyz = Raster2xyz()
-            rtxyz.translate(input_raster, out_csv)
+        # # transform .tif file to a format which is workable in python
+        # if not os.path.exists(out_csv):
+        #     rtxyz = Raster2xyz()
+        #     rtxyz.translate(input_raster, out_csv)
+        break
         
         ahn_csv = pd.read_csv(out_csv, delimiter = ',')
         ahn_csv = ahn_csv[ahn_csv['z'] != 3.4028235e+38]
@@ -320,3 +323,4 @@ for scene, file in scene_dict.items():
             
         plt.close('all')
         gc.collect()
+        break
