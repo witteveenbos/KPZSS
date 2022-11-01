@@ -52,7 +52,8 @@ path_coupling = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_pro
 path_1D_outlocs = r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode\HRD_locations_selectie_WZ_300m_interval_OKid.shp'
 
 # Switch to results to Excel
-save_excel = False
+save_excel_ids = False
+save_excel_output = True
 
 #%% Read output for selected locations and export to Excel
 
@@ -131,7 +132,7 @@ data = {'OKid': OKids,
         'OKids_near': OKids_near}
 assignment = pd.DataFrame(data)
 
-if save_excel:
+if save_excel_ids:
     assignment.to_excel(os.path.join(path_main,'assignment_okader_ids_simulatie_SWAN2D_WZ.xlsx')) 
 
 
@@ -198,7 +199,7 @@ appended_data_01 = pd.concat(appended_data_01)
 print('maximum distace with SWAN output loc = %.2f' % min_dis_max)
 
 
-#%% get output along 1D profiles (input 1D SWAN simulations)
+#%% get output along 1D profiles 300m from dyke (input 1D SWAN simulations)
 
 outlocs_name = 'HRext01'
 
@@ -271,11 +272,85 @@ appended_data_02 = pd.concat(appended_data_02)
 print('maximum distace with SWAN output loc = %.2f' % min_dis_max)
 
 
+#%% get output along 1D profiles 600m from dyke (input 1D SWAN simulations)
+
+outlocs_name = 'HRext01'
+
+df_outlocs = gp.read_file(path_1D_outlocs)
+
+distance = 600
+
+pd.options.mode.chained_assignment = None
+
+min_dis_max = 0
+no_match = 0
+
+# loop over all scenario's and simulations
+
+appended_data_03 = []
+for diri in dirs:
+    ix = 0
+    dirname = os.path.basename(os.path.normpath(diri))
+    for OKid in OKids:
+                   
+        som_id = assignment[assignment['OKid']==OKid]['som_id']
+        
+        subdir = list_files_folders.list_folders(diri, dir_incl="ID%03d" % som_id)       
+        subdir = subdir[0]
+        
+        files = list_files_folders.list_files('.TAB', subdir, startswith = False, endswith = True)
+        subdirname = os.path.basename(os.path.normpath(subdir))
+        scen_name = diri.split("\\")[-1]
+        for file in files:
+            f = os.path.basename(os.path.normpath(file))
+            if f.startswith(outlocs_name):
+                print(OKid)
+                print(scen_name)
+                print(f)
+                data, headers = SWAN_read_tab.Freadtab(os.path.join(subdir,f))  
+        
+        match = (df_outlocs['HubName'] == OKid) & (df_outlocs['cngmeters'] == distance)
+        if match.any(axis=0) == True:
+            xq = df_outlocs[(df_outlocs['HubName'] == OKid) & (df_outlocs['cngmeters'] == distance)]['xcoord'].iloc[0]  
+            yq = df_outlocs[(df_outlocs['HubName'] == OKid) & (df_outlocs['cngmeters'] == distance)]['ycoord'].iloc[0] 
+            
+            xx = data['Xp']
+            yy = data['Yp']        
+            
+            dx = xx - xq
+            dy = yy - yq
+            dis = np.sqrt(dx**2 + dy**2)
+
+            min_dis = np.min(dis)
+            print('min distance = %.2f' % min_dis)
+            row_ind = np.argmin(dis, axis=0)
+            print('min index = %d' % row_ind)
+            min_dis_max = max(min_dis, min_dis_max)
+                   
+            result  = data.iloc[[row_ind]]
+            
+            result['OkaderId'] = OKid
+            result['Scenario'] = dirname
+            result['min_dis'] = min_dis
+            result['row_ind'] = row_ind
+            appended_data_03.append(result)
+            
+            del data, result, dis, xx, yy, xq, yq  
+            
+        else:  
+            print('OKid %s has no matching 1D profile' % OKid)
+            no_match = no_match + 1
+                       
+appended_data_03 = pd.concat(appended_data_03)
+print('maximum distace with SWAN output loc = %.2f' % min_dis_max)
+
+
 #%% now write result to Excel
 
-if save_excel:
-    writer = pd.ExcelWriter(os.path.join(path_main,'output_productie_SWAN2D_WZ.xlsx'), engine = 'xlsxwriter')
+if save_excel_output:
+    writer = pd.ExcelWriter(os.path.join(path_main,'output_productie_SWAN2D_WZ_v2.xlsx'), engine = 'xlsxwriter')
     appended_data_01.to_excel(writer, sheet_name = 'HRbasis')
     appended_data_02.to_excel(writer, sheet_name = 'HRext01')
+    appended_data_03.to_excel(writer, sheet_name = 'HRext01_600m')
     writer.save()
     writer.close()
