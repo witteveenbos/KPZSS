@@ -54,7 +54,6 @@ path_output = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\concept_01'
 
 # Output location to use in SWAN2D output files
 outloc1 = 'HRbasis'
-outloc2 = 'HRext01' ###########################################################
 
 # Switch to save results to Excel
 save_excel = True
@@ -72,12 +71,18 @@ df_1d = xl_1d.parse()
 # info on which output to use for each okader vak
 df_vakken = gp.read_file(path_shape_vakken)
 
+
 #%% Combine 2D and 1D results
 
 appended_data = []
 
 OKids = df_2d['OkaderId'].unique()
 scenarios = df_2d['Scenario'].unique()
+
+start_wrong = scenarios[0]
+startscen = scenarios[6]
+scenarios[0] = startscen
+scenarios[6] = start_wrong
 
 # loop over all okader vakken and combine results
 for OKid in OKids:
@@ -108,7 +113,7 @@ for OKid in OKids:
         if match_1d.any() == True:
             output_1d       = df_1d[match_1d]
             Hs_out          = output_1d['Hsig'].iloc[0]
-            Hs_basis        = output_1d['Hs_basis'].iloc[0]
+            Hs_basis        = output_1d['Hs_basis_2d'].iloc[0]
             Hs_D            = output_1d['Hs_D'].iloc[0]
             Hs_decr_rel     = output_1d['Hs_decr_rel'].iloc[0]
             z_200m_avg      = output_1d['z_200m_avg'].iloc[0]
@@ -125,19 +130,9 @@ for OKid in OKids:
                 use_2d      = 0
                 use_1d      = 0
                 use_haven   = 1
-            elif switch_1d == 1 and Hs_basis < 0 and Hs_out > 0:
+            elif switch_1d == 1 and switch_haven == 'Nee' and Hs_basis < 0 and Hs_out > 0:
                 use_2d      = 0
                 use_1d      = 1
-                use_haven   = 0
-            elif switch_1d == 1 and Hs_basis < 0 and Hs_out < 0:
-                use_2d      = 0
-                use_2d_300  = 1 #####################################################
-                use_1d      = 0
-                use_haven   = 0
-            elif switch_1d == 0 and Hs_basis < 0:
-                use_2d      = 0
-                use_2d_300  = 1 #####################################################
-                use_1d      = 0
                 use_haven   = 0
             elif switch_1d == 1 and switch_haven == 'Nee' and abs(Hs_300m_diff) <= 0.2 and abs(Tm10_300m_diff) <= 0.25 and Hs_out > 0 and ~np.isnan(Hs_out): 
                 if Hs_decr_rel <= -0.10 or z_200m_avg >= 1:
