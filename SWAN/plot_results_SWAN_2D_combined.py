@@ -54,8 +54,8 @@ vec_thinning = 40
 
 #%% Get directories with output data
 
-dirs_01 = list_files_folders.list_folders(path_main_01, dir_incl='WZ_GM_01_050_A1', startswith = True, endswith = False)
-dirs_02 = list_files_folders.list_folders(path_main_02, dir_incl='WZ_GM_01_050_A1', startswith = True, endswith = False)
+dirs_01 = list_files_folders.list_folders(path_main_01, dir_incl='WZ', startswith = True, endswith = False)
+dirs_02 = list_files_folders.list_folders(path_main_02, dir_incl='WZ', startswith = True, endswith = False)
 
 if len(dirs_01) == len(dirs_01):
     print('== list of dirs for G1 is the same length as for G2')
@@ -64,7 +64,7 @@ else:
 
 #%% loop over directions and plot output
     
-for diri in dirs_01:
+for diri in dirs_01[9:]:
     subdirs = list_files_folders.list_folders(diri, dir_incl='ID')
     for subdiri in subdirs:
         print('Start at {} doing stuff'.format(datetime.datetime.now()))
