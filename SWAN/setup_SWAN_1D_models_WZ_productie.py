@@ -35,16 +35,16 @@ import numpy as np
 
 #%% Settings
 
-dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01',
-        'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\_bodem',
-        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01\input'}
+dirs = {'main':     r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_01',
+        'bathy':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\_bodem',
+        'input':    r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_01\input'}
 
 files = {'swan_templ':  'template.swn',
          'qsub_templ':  'dummy.qsub',
          'scen_xlsx':   'scenarios_SWAN_2D_WZ_v02.xlsx',
-         'swan_output': 'output_productie_SWAN2D_WZ.xlsx'}
+         'swan_output': 'output_productie_SWAN2D_WZ_v3.xlsx'}
 
-outloc = 'HRext01'
+outloc = 'HRext01_300m'
 
 node = 'despina'
 ppn = 1
@@ -153,13 +153,23 @@ for ss in range(len(df_scen)):
             dspr        = df_input_scen['Dspr'][cc]
             gamma       = 3.3
             locid       = str(df_input_scen['OkaderId'][cc])
+            
+            # replace nans
+            if np.isnan(wl) or np.isnan(ws) or np.isnan(wd) or np.isnan(hs) or np.isnan(tp) or np.isnan(dirw):
+                wl      = -999
+                ws      = -999
+                wd      = -999
+                hs      = -999
+                tp      = -999
+                dirw    = -999           
+                        
             conid       = "WZ%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd_name, hs, tp, dirw)
             runid       = 'ID' + locid + '_' + conid
             swan_out    = runid + '.swn'
             qsub_out    = runid + '.qsub'
             
             print(runid)
-                   
+                              
             # make scenario directory
             dir_run = os.path.join(dir_scen, runid)
             if not os.path.exists(dir_run):
