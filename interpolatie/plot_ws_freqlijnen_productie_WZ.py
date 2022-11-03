@@ -73,7 +73,7 @@ for Naam in Namen:
             plt.legend(loc = 'upper left')
             plt.xlabel('Frequentie')
             plt.ylabel('Waterstand (m) +NAP')
-            plt.title("%s | WZ | %s"% (OKid, Naam))
+            plt.title("%s | WS | %s"% (OKid, Naam))
             plt.ylim(2, 15)
             plt.yticks(np.arange(2, 15.1, 1))
             plt.style.use('ggplot')

@@ -42,18 +42,19 @@ from hmtoolbox.WB_basic import save_plot
 import shutil
 # %pylab qt
 import gc
+import xlsxwriter
 
 #%% Settings
 
 # main
-path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01'
-path_results_1D = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01'
-path_profile_info = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\_bodem\profile_info_SWAN1D_WZ.xlsx'
+path_main = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\03_productie_vegetatie\iter03'
+path_results_1D = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\03_productie_vegetatie\iter03'
+path_profile_info = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\03_productie_vegetatie\_bodem\profile_info_SWAN1D_WZ.xlsx'
 
 tab_files = list_files_folders.list_files('.TAB',path_results_1D)
 
 # input SWAN 1D
-path_input = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01\input'
+path_input = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\03_productie_vegetatie\iter03\input'
 file_input = r'output_productie_SWAN2D_WZ.xlsx'
 
 save_fig = True
@@ -63,7 +64,7 @@ new_iteration = False
 save_result = False
 
 # path with new iteration
-path_new = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_02'
+path_new = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\03_productie_vegetatie\iter_0x'
 
 Xp_300 = 300
 # Xp_basis = 99.8
@@ -144,7 +145,7 @@ for tab_file in tab_files:
             dydx = 0
         else:
             dydx = dy/dx
-            if dydx >= 1/10 and ii == 0:
+            if dydx <= 1/10 and ii == 0:
                 Xpteen = x1
                 Ypteen = y2
                 ii = ii +1             
@@ -343,7 +344,7 @@ for tab_file in tab_files:
     t1.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
     t2.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
     t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    plt.title(f'{scene}\n{simulation}\n HRbasis: Hs = {Hs_basis:.2f} m, Tm10 = {Tm10_basis:.2f}\n L = {Wlen:.0f} m, Hs/D = {Hs_D:.2f}, z_200m_avg = {z_200m_avg:.1f} m')
+    plt.title(f'{scene}\n{simulation} incl. vegetation\n HRbasis: Hs = {Hs_basis:.2f} m, Tm10 = {Tm10_basis:.2f}\n L = {Wlen:.0f} m, Hs/D = {Hs_D:.2f}, z_200m_avg = {z_200m_avg:.1f} m')
     ax1_copy.legend(loc = 'center right')
     ax1_copy.set_ylim(0,np.ceil(Hs_max))
     
