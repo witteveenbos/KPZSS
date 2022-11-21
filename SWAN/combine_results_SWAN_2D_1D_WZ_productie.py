@@ -37,10 +37,10 @@ import numpy as np
 #%% Settings
 
 # SWAN 2D output
-path_output_2d      = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\serie_01\G2\output_productie_SWAN2D_WZ.xlsx'
+path_output_2d      = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\2D\Waddenzee\03_productiesommen\serie_01\G2\output_productie_SWAN2D_WZ_v3.xlsx'
 
 # SWAN 1D output
-path_output_1d      = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_03\output_productie_SWAN1D_WZ.xlsx'
+path_output_1d      = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_03\output_productie_SWAN1D_WZ_iter_03.xlsx'
 
 # Shapefile with info for each okader vak, minimal info: 
 #   VakId (int): okader vakid
@@ -50,7 +50,7 @@ path_output_1d      = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\
 path_shape_vakken   = r'd:\Users\ENGT2\Documents\Projects\130991 - SA Waterveiligheid ZSS\GIS\illustratiepunten_methode\shape + 1d-flag\okader_fc_hydra_unique_handedit_WZ_v3_coords.shp'
 
 # Path to save output
-path_output = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\concept_01'
+path_output = r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\concept02'
 
 # Output location to use in SWAN2D output files
 outloc1 = 'HRbasis'
@@ -79,10 +79,16 @@ appended_data = []
 OKids = df_2d['OkaderId'].unique()
 scenarios = df_2d['Scenario'].unique()
 
-start_wrong = scenarios[0]
-startscen = scenarios[6]
-scenarios[0] = startscen
-scenarios[6] = start_wrong
+# always start with reference scenario
+ind0 = int(np.where(scenarios == 'WZ_NM_01_000_RF')[0])
+if ind0 > 0:
+    print('reference scenario is not first in list, make it first')
+    start_wrong = scenarios[0]
+    startref = scenarios[ind0]
+    scenarios[0] = startref
+    scenarios[ind0] = start_wrong
+else:
+    print('reference scenario is first in list, do nothing')
 
 # loop over all okader vakken and combine results
 for OKid in OKids:
@@ -130,7 +136,7 @@ for OKid in OKids:
                 use_2d      = 0
                 use_1d      = 0
                 use_haven   = 1
-            elif switch_1d == 1 and switch_haven == 'Nee' and Hs_basis < 0 and Hs_out > 0:
+            elif switch_haven == 'Nee' and Hs_basis < 0 and Hs_out > 0:
                 use_2d      = 0
                 use_1d      = 1
                 use_haven   = 0
@@ -203,7 +209,7 @@ for OKid in OKids:
                       'y_okader_middelpunt': y_okader_mp,
                       'Scenario': scenario,
                       'Depth':    output_1d['Dep'].iloc[0],
-                      'Watlev':   output_2d['Watlev'].iloc[0],
+                      'Watlev':   output_1d['Watlev'].iloc[0],
                       'Hsig':     output_1d['Hsig'].iloc[0],
                       'Tpsmoo':   output_1d['TPsmoo'].iloc[0],
                       'Tm_10':    output_1d['Tm_10'].iloc[0],
@@ -231,4 +237,4 @@ for OKid in OKids:
 output_df = pd.DataFrame(appended_data)
 
 if save_excel:
-    output_df.to_excel(os.path.join(path_output,'output_productie_combined_WZ_v01.xlsx'))
+    output_df.to_excel(os.path.join(path_output,'output_productie_combined_WZ_v02.xlsx'))

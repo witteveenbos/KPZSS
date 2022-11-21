@@ -46,24 +46,24 @@ import gc
 #%% Settings
 
 # main
-path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01'
-path_results_1D = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01'
-path_profile_info = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\_bodem\profile_info_SWAN1D_WZ.xlsx'
+path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_01'
+path_results_1D = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_01'
+path_profile_info = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\_bodem\profile_info_SWAN1D_WZ.xlsx'
 
 tab_files = list_files_folders.list_files('.TAB',path_results_1D)
 
 # input SWAN 1D
-path_input = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01\input'
+path_input = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_01\input'
 file_input = r'output_productie_SWAN2D_WZ.xlsx'
 
-save_fig = True
+save_fig = False
 
 new_iteration = False
 
 save_result = False
 
 # path with new iteration
-path_new = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_02'
+path_new = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_02'
 
 Xp_300 = 300
 # Xp_basis = 99.8
@@ -122,6 +122,8 @@ for tab_file in tab_files:
     Dir_basis = df_basis[match2]['Tm_10'].iloc[0]
 
     data, headers = SWAN_read_tab.Freadtab(tab_file)
+    
+    break
     
     data['Hsig'][data['Hsig']<=0] = np.nan
     data['Hsig'][data['Hsig']==0] = np.nan

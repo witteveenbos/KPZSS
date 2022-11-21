@@ -42,8 +42,10 @@ dirs    = {'figures'        : r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\c
 files   = {'swan'           : r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\concept02\DikeHeight.xlsx',
            'hydra'          : r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_HBN\Waddenzee_HBN_v4.xlsx',
            'interpolatie'   : r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\concept02\interpolatie\interpolatie.xlsx',
-           'scenarios'      : r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\concept02\interpolatie\scenarios.xlsx'}
+           'scenarios'      : r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\concept02\interpolatie\scenarios.xlsx',
+           'correctie_FZ'   : r'z:\130991_Systeemanalyse_ZSS\5.Results\SWAN\WZ\concept02\interpolatie\HBN_tijdlijnen_WZ_02_coord_correctie_FZ_clean.xlsx'}
 
+make_fig        = True
 save_figure     = True
 save_excel      = True
 
@@ -60,6 +62,9 @@ interpolatie = pd.read_excel(files['interpolatie'],sheet_name = 'combined')
 
 # Excel-file with scenario info
 scenarios = pd.read_excel(files['scenarios'],sheet_name = 'combined')
+
+# Excel-file corrected dHBN values (Friesche Zeegat correction)
+dhbn_corr = pd.read_excel(files['correctie_FZ'])
 
 #%% Interpolatie 
 
@@ -140,7 +145,9 @@ for OKid in OKids:
             interpolatie_vak['HBN_ref'][index] = hbn_ref
             
             # delta HBN
-            interpolatie_vak['delta_HBN'][index] = interpolatie_vak['HBN_SWAN'][index] - interpolatie_vak['HBN_ref'][index]
+            # interpolatie_vak['delta_HBN'][index] = interpolatie_vak['HBN_SWAN'][index] - interpolatie_vak['HBN_ref'][index]
+            match_corr = (dhbn_corr['vakid'] == OKid) & (dhbn_corr['Bodem'] == tijdpunt['Bodem']) & (dhbn_corr['Tijdlijn'] == tijdpunt['Tijdlijn']) & (dhbn_corr['Zichtjaar'] == tijdpunt['Zichtjaar'])
+            interpolatie_vak['delta_HBN'][index] = dhbn_corr['dHBN'][match_corr]
             
             # for NM bodem: final HBN is HBN from Hydra
             if tijdpunt['Bodem'] == 'NM':
@@ -202,43 +209,44 @@ for OKid in OKids:
         interpolatie_vak['berekening'][index] = berekening
         
     # plot results
-    tijdlijnen = interpolatie_vak.Tijdlijn.unique()
-    bodems = interpolatie_vak.Bodem.unique()
-    ix = 0
-    for bodem in bodems:
-        fig = plt.figure()
-        for tijdlijn in tijdlijnen:
-            tl_all = interpolatie_vak[interpolatie_vak['Bodem'] == bodem]
-            x = tl_all[tl_all['Tijdlijn'] == tijdlijn]['Zichtjaar']
-            y = tl_all[tl_all['Tijdlijn'] == tijdlijn]['HBN_final']
-            y_hydra = tl_all[tl_all['Tijdlijn'] == tijdlijn]['HBN_Hydra']
-            plt.plot(x,y,label=tijdlijn)
-            plt.plot(x,y_hydra,'k.')
-        plt.plot(2023,y_hydra.iloc[0],'k.',label='Hydra-NL')
-        plt.legend(loc = 'upper left')
-        plt.xlabel('Zichtjaar')
-        plt.ylabel('HBN (m) +NAP')
-        # plt.title("%s | HBN | %s"% (OKid, bodem))
-        plt.title("%s | HBN | %s"% (OKid, bodem))
-        plt.style.use('ggplot')
-        if ix == 0:
-            ax = plt.gca()
-            xlimits = ax.get_xlim()
-            ylimits = ax.get_ylim() 
-        plt.ylim(ylimits[0], ylimits[1])
-        plt.yticks(np.arange(np.floor(ylimits[0]), np.ceil(ylimits[1])+0.01, 1)) 
-        ix = ix + 1
-        # save plot
-        if save_figure:
-            fname = "output_%s_%d.png" % (bodem, OKid)
-            savename = os.path.join(dirs['figures'],fname)
-            save_plot.save_plot(fig, savename, incl_wibo = False, dpi = 300, 
-                      change_size = False, figwidth = 8, figheight = 6)
-            
-        plt.close()
+    if make_fig:
+        tijdlijnen = interpolatie_vak.Tijdlijn.unique()
+        bodems = interpolatie_vak.Bodem.unique()
+        ix = 0
+        for bodem in bodems:
+            fig = plt.figure()
+            for tijdlijn in tijdlijnen:
+                tl_all = interpolatie_vak[interpolatie_vak['Bodem'] == bodem]
+                x = tl_all[tl_all['Tijdlijn'] == tijdlijn]['Zichtjaar']
+                y = tl_all[tl_all['Tijdlijn'] == tijdlijn]['HBN_final']
+                y_hydra = tl_all[tl_all['Tijdlijn'] == tijdlijn]['HBN_Hydra']
+                plt.plot(x,y,label=tijdlijn)
+                plt.plot(x,y_hydra,'k.')
+            plt.plot(2023,y_hydra.iloc[0],'k.',label='Hydra-NL')
+            plt.legend(loc = 'upper left')
+            plt.xlabel('Zichtjaar')
+            plt.ylabel('HBN (m) +NAP')
+            # plt.title("%s | HBN | %s"% (OKid, bodem))
+            plt.title("%s | HBN | %s"% (OKid, bodem))
+            plt.style.use('ggplot')
+            if ix == 0:
+                ax = plt.gca()
+                xlimits = ax.get_xlim()
+                ylimits = ax.get_ylim() 
+            plt.ylim(ylimits[0], ylimits[1])
+            plt.yticks(np.arange(np.floor(ylimits[0]), np.ceil(ylimits[1])+0.01, 1)) 
+            ix = ix + 1
+            # save plot
+            if save_figure:
+                fname = "output_%s_%d.png" % (bodem, OKid)
+                savename = os.path.join(dirs['figures'],fname)
+                save_plot.save_plot(fig, savename, incl_wibo = False, dpi = 300, 
+                          change_size = False, figwidth = 8, figheight = 6)
+                
+            plt.close()
         
     output = output.append(interpolatie_vak, ignore_index=True)
 
 if save_excel:      
-    fname = 'HBN_tijdlijnen_WZ_02_coord.xlsx'
+    fname = 'HBN_tijdlijnen_WZ_03_coord.xlsx'
     output.to_excel(os.path.join(dirs['output'],fname))  

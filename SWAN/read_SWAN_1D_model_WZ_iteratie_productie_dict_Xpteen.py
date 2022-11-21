@@ -40,6 +40,8 @@ from hmtoolbox.WB_SWAN import SWAN_read_tab
 from hmtoolbox.WB_basic import list_files_folders
 from hmtoolbox.WB_basic import save_plot
 import shutil
+import numpy as np
+
 # %pylab qt
 import gc
 import xlsxwriter
@@ -47,44 +49,23 @@ import xlsxwriter
 #%% Settings
 
 # main
-path_main = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_03'
-path_results_1D = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_03\WZ_NM_01_000_RF'
-path_profile_info = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\_bodem\profile_info_SWAN1D_WZ.xlsx'
+path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_01'
+path_results_1D = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_01\WZ_NM_01_000_RF'
+path_profile_info = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\_bodem'
+file_profile_info = 'profile_info_SWAN1D_WZ.xlsx'
 
 tab_files = list_files_folders.list_files('.TAB',path_results_1D)
 
-# input SWAN 1D
-path_input = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\iter_01\input'
-file_input = r'output_productie_SWAN2D_WZ.xlsx'
+save_result = True
 
-save_fig = True
+# path output file
+path_out = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\_bodem'
 
-new_iteration = False
-
-save_result = False
-
-# path with new iteration
-path_new = r'Z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\03_productie_vegetatie\iter_0x'
-
-Xp_300 = 300
-# Xp_basis = 99.8
 
 #%% Load tab_file with simulation input
 
-# Output at locations 'HRext01' (see .swan-file)
-outloc = 'HRext01'
-
-xl_input  = pd.ExcelFile(os.path.join(path_input, file_input),engine='openpyxl')
-df_input = xl_input.parse(sheet_name = outloc)
-
-# Output at locations 'HRbasis' (see .swan-file)
-outloc = 'HRbasis'
-
-xl_basis  = pd.ExcelFile(os.path.join(path_input, file_input),engine='openpyxl')
-df_basis = xl_basis.parse(sheet_name = outloc)
-
 # Excel with info on 1D profiles (orientation)
-xl_profile  = pd.ExcelFile(path_profile_info,engine='openpyxl')
+xl_profile  = pd.ExcelFile(os.path.join(path_profile_info,file_profile_info),engine='openpyxl')
 df_profile  = xl_profile.parse()
 df_profile['Xp_teen'] = np.nan
 
@@ -109,12 +90,11 @@ for tab_file in tab_files:
             data, headers = SWAN_read_tab.Freadtab(tab_file)
             data['Botlev'][data['Botlev']<-20] = -10
             
-            #%% Determine location toe of dike (defined as first location where slope > 1/10, as seen from dyke)
+            #%% Determine location toe of dike (defined as first location where slope < 1/10, as seen from dyke)
             
             ii = 0
             slope = list()
-            Xpteen = data['Xp'].iloc[-1]
-            Ypteen = data['Yp'].iloc[-1]
+            Xpteen = data['Xp'].iloc[0]
             for x1, x2, y1, y2 in zip(data['Xp'][1:40], data['Xp'][:41], data['Botlev'][1:40], data['Botlev'][:41]):
                 dx = x1 - x2
                 dy = y1 - y2
@@ -122,20 +102,19 @@ for tab_file in tab_files:
                     dydx = 0
                 else:
                     dydx = dy/dx
-                    if dydx <= 1/10 and ii == 0:
-                        Xpteen = x1
-                        Ypteen = y2
-                        ii = ii +1             
+                    if dydx <= 1/10 and x2 > 10 and ii == 0:
+                        Xpteen = x2
+                        ii = ii + 1
+                if np.isnan(Xpteen) or Xpteen == 0:
+                    Xpteen = 10
                 slope.append(dydx)
             if ii == 0:
                 slope_max = np.nanmax(slope)
                 slope_max_ind = np.nanargmax(slope)
                 Xpteen = data['Xp'][slope_max_ind]
 
-            # print(Xpteen)
         df_profile['Xp_teen'].loc[(df_profile['OkaderId']==float(loc)) & (df_profile['Scenario'] == scene)] = Xpteen
-        # max_slope = max(slope)
-        # imax = np.argmax(slope)
 
-savename = os.path.join(r"D:\Users\BADD\Desktop\KP ZSS", 'profile_info_SWAN1D_WZ_v3.xlsx')
-df_profile.to_excel(savename, index = False)
+if save_result:
+    savename = os.path.join(path_out, 'profile_info_SWAN1D_WZ_xteen.xlsx')
+    df_profile.to_excel(savename, index = False)

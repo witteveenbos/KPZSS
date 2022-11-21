@@ -47,37 +47,36 @@ import gc
 #%% Settings
 
 # main
-path_main = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_03'
-path_results_1D = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_03'
-path_profile_info = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/_bodem/profile_info_SWAN1D_WZ.xlsx'
+path_main = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_02'
+path_results_1D = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_02'
+path_profile_info = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\_bodem\profile_info_SWAN1D_WZ_xteen.xlsx'
 
 tab_files = list_files_folders.list_files('.TAB',path_results_1D)
 
 # input SWAN 1D
-path_input = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_01/input'
-file_input = r'output_productie_SWAN2D_WZ.xlsx'
+path_input = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_01\input'
+file_input = r'output_productie_SWAN2D_WZ_v3.xlsx'
 
 # shapefile with okader vak info (including boolean with harbour or 1D)
-path_shape_vakken   = r'/project/130991_Systeemanalyse_ZSS/2.Data/GIS_TEMP/okader_fc_hydra_unique_handedit_WZ_v3_coords.shp'
+path_shape_vakken   = r'z:\130991_Systeemanalyse_ZSS\2.Data\GIS_TEMP\okader_fc_hydra_unique_handedit_WZ_v3_coords.shp'
 
-save_fig = False
+save_fig = True
 
-new_iteration = False
+new_iteration = True
 
-save_result = False
+save_result = True
 
 final_iteration = False
 
 # path with new iteration
-path_new = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_03'
+path_new = r'z:\130991_Systeemanalyse_ZSS\3.Models\SWAN\1D\Waddenzee\02_productie\serie_02\iter_03'
 
 Xp_300 = 300
-# Xp_basis = 99.8
 
 #%% Load tab_file with simulation input
 
 # Output at locations 'HRext01' (see .swan-file)
-outloc = 'HRext01'
+outloc = 'HRext01_300m'
 
 xl_input  = pd.ExcelFile(os.path.join(path_input, file_input),engine='openpyxl')
 df_input = xl_input.parse(sheet_name = outloc)
@@ -102,8 +101,8 @@ appended_output = []
 for tab_file in tab_files:
     
     # get relevant names from filename
-    scene = tab_file.split('/')[-3]
-    simulation = tab_file.split('/')[-2]
+    scene = tab_file.split('\\')[-3]
+    simulation = tab_file.split('\\')[-2]
     loc = simulation.split('_')[0][2:]
     
     # output path 
@@ -137,7 +136,7 @@ for tab_file in tab_files:
     Dir_basis = df_basis[match2]['Tm_10'].iloc[0]
 
     data, headers = SWAN_read_tab.Freadtab(tab_file)
-       
+    
     data['Hsig'][data['Hsig']<=0] = np.nan
     data['Hsig'][data['Hsig']==0] = np.nan
     data['Tm_10'][data['Tm_10']<=0] = np.nan
@@ -146,36 +145,13 @@ for tab_file in tab_files:
     data['Botlev'][data['Botlev']<-20] = -10
     Wlen = float(data['Lwavp'].iloc[-1])
     
-    #%% Determine location toe of dike (defined as first location where slope < 1/10, as seen from dyke)
-    
-    ii = 0
-    slope = list()
-    Xpteen = data['Xp'].iloc[-1]
-    Ypteen = data['Yp'].iloc[-1]
-    dx = data['Xp'][1] - data['Xp'][0]
-    for x1, x2, y1, y2 in zip(data['Xp'][1:40], data['Xp'][:41], data['Botlev'][1:40], data['Botlev'][:41]):
-        dx = x1 - x2
-        dy = y1 - y2
-        if dy == 0:
-            dydx = 0
-        else:
-            dydx = dy/dx
-            # if dydx >= 1/10 and ii == 0:
-            if dydx <= 1/10 and ii == 0:
-                Xpteen = x1 - dx
-                Ypteen = y2
-                ii = ii +1
-                if Xpteen <=5:
-                    Xpteen = 5
-        slope.append(dydx)
-    if ii == 0:
-        slope_max = np.nanmax(slope)
-        slope_max_ind = np.nanargmax(slope)
-        Xpteen = data['Xp'][slope_max_ind]
 
-    # max_slope = max(slope)
-    # imax = np.argmax(slope)
+    #%% Get location of teen from file
     
+    Xpteen = df_profile['Xp_teen'].loc[(df_profile['OkaderId']==float(loc)) & (df_profile['Scenario'] == 'WZ_NM_01_000_RF')]
+    Xpteen = float(Xpteen)
+    print(Xpteen)
+       
     #%% Wave parameters at incoming boundary
     
     Xpin = data['Xp'].iloc[-1]
@@ -463,4 +439,4 @@ for tab_file in tab_files:
 
 output_df = pd.DataFrame(appended_output)
 if save_result:
-    output_df.to_excel(os.path.join(path_main,'output_productie_SWAN1D_WZ.xlsx')) 
+    output_df.to_excel(os.path.join(path_main,'output_productie_SWAN1D_WZ_iter_01.xlsx')) 

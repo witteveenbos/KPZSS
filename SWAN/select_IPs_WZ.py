@@ -17,6 +17,8 @@ import matplotlib.pyplot as plt
 from hmtoolbox.WB_basic import save_plot
 from hmtoolbox.WB_basic import save_plot_mod
 
+%matplotlib qt
+
 #%% settings
 
 dirs = {'input':    r'z:\130991_Systeemanalyse_ZSS\5.Results\Hydra-NL_HBN',

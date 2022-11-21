@@ -23,9 +23,9 @@ import numpy as np
 from overtopping import overtopping
 
 # settings
-path_input      = r'/project/130991_Systeemanalyse_ZSS/5.Results/SWAN/WZ/concept01/output_productie_combined_WZ_v01.xlsx'
+path_input      = r'/project/130991_Systeemanalyse_ZSS/5.Results/SWAN/WZ/concept02/output_productie_combined_WZ_v02.xlsx'
 path_locations  = r'/project/130991_Systeemanalyse_ZSS/2.Data/GIS_TEMP/okader_fc_hydra_unique_handedit_WZ_v3_coords.shp'
-path_out        = r'/project/130991_Systeemanalyse_ZSS/5.Results/SWAN/WZ/concept01'
+path_out        = r'/project/130991_Systeemanalyse_ZSS/5.Results/SWAN/WZ/concept02'
 
 save_excel = True
 
