@@ -47,20 +47,21 @@ import gc
 #%% Settings
 
 # main
-path_main = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_03'
-path_results_1D = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_03'
-path_profile_info = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/_bodem/profile_info_SWAN1D_WZ.xlsx'
+path_main = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/serie_02/iter_03'
+path_results_1D = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/serie_02/iter_03'
+path_profile_info = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/serie_02/_bodem/profile_info_SWAN1D_WZ_xteen.xlsx'
 
 tab_files = list_files_folders.list_files('.TAB',path_results_1D)
 
 # input SWAN 1D
-path_input = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_01/input'
-file_input = r'output_productie_SWAN2D_WZ.xlsx'
+path_input = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/serie_02/iter_01/input'
+file_input = r'output_productie_SWAN2D_WZ_v3.xlsx'
 
 # shapefile with okader vak info (including boolean with harbour or 1D)
 path_shape_vakken   = r'/project/130991_Systeemanalyse_ZSS/2.Data/GIS_TEMP/okader_fc_hydra_unique_handedit_WZ_v3_coords.shp'
 
-save_fig = True
+make_fig = False
+save_fig = False
 
 new_iteration = False
 
@@ -69,15 +70,14 @@ save_result = True
 final_iteration = True
 
 # path with new iteration
-path_new = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_03'
+path_new = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/serie_02/iter_03'
 
 Xp_300 = 300
-# Xp_basis = 99.8
 
 #%% Load tab_file with simulation input
 
 # Output at locations 'HRext01' (see .swan-file)
-outloc = 'HRext01'
+outloc = 'HRext01_300m'
 
 xl_input  = pd.ExcelFile(os.path.join(path_input, file_input),engine='openpyxl')
 df_input = xl_input.parse(sheet_name = outloc)
@@ -146,36 +146,13 @@ for tab_file in tab_files:
     data['Botlev'][data['Botlev']<-20] = -10
     Wlen = float(data['Lwavp'].iloc[-1])
     
-    #%% Determine location toe of dike (defined as first location where slope < 1/10, as seen from dyke)
-    
-    ii = 0
-    slope = list()
-    Xpteen = data['Xp'].iloc[-1]
-    Ypteen = data['Yp'].iloc[-1]
-    dx = data['Xp'][1] - data['Xp'][0]
-    for x1, x2, y1, y2 in zip(data['Xp'][1:40], data['Xp'][:41], data['Botlev'][1:40], data['Botlev'][:41]):
-        dx = x1 - x2
-        dy = y1 - y2
-        if dy == 0:
-            dydx = 0
-        else:
-            dydx = dy/dx
-            # if dydx >= 1/10 and ii == 0:
-            if dydx <= 1/10 and ii == 0:
-                Xpteen = x1 - dx
-                Ypteen = y2
-                ii = ii +1
-                if Xpteen <=5:
-                    Xpteen = 5
-        slope.append(dydx)
-    if ii == 0:
-        slope_max = np.nanmax(slope)
-        slope_max_ind = np.nanargmax(slope)
-        Xpteen = data['Xp'][slope_max_ind]
 
-    # max_slope = max(slope)
-    # imax = np.argmax(slope)
+    #%% Get location of teen from file
     
+    Xpteen = df_profile['Xp_teen'].loc[(df_profile['OkaderId']==float(loc)) & (df_profile['Scenario'] == 'WZ_NM_01_000_RF')]
+    Xpteen = float(Xpteen)
+    print(Xpteen)
+       
     #%% Wave parameters at incoming boundary
     
     Xpin = data['Xp'].iloc[-1]
@@ -192,6 +169,7 @@ for tab_file in tab_files:
     Tp_out = data['TPsmoo'][data['Xp'] >= Xpout].iloc[0]
     Tm10_out = data['Tm_10'][data['Xp'] >= Xpout].iloc[0]
     Dir_out_rel = data['Dir'][data['Xp'] >= Xpout].iloc[0]
+    Watlev = data['Watlev'][data['Xp'] >= Xpout].iloc[0]
     
     #%% Calculate wave direction (nautical convention)
     # The 1D profiles in SWAN are all oriëntated from West to East (so along x-axis, 90 degrees nautical)
@@ -319,6 +297,7 @@ for tab_file in tab_files:
     output = {'OkaderId':   int(loc),
               'Scenario':   scene,
               'Dep':        Dep_out,
+              'Watlev':     Watlev,
               'Hsig':       Hs_out,
               'TPsmoo':     Tp_out,
               'Tm_10':      Tm10_out,
@@ -346,121 +325,127 @@ for tab_file in tab_files:
     
     # if final iteration: determine whether SWAN 1D are used or not
     # determine which output to use (2D, 1D, haven)
+    
+    # determine which output to use (2D, 1D, haven) for reference scenario
     if final_iteration == True:  
         if switch_1d == 0 and switch_haven == 'Nee':
             use_2d      = 1
             use_1d      = 0
             use_haven   = 0
             title_color = 'r'
-            fig_name_add = '_not_used'
+            fig_name_add = '_SWAN2D'
         elif switch_1d == 0 and switch_haven == 'Ja':
             use_2d      = 0
             use_1d      = 0
             use_haven   = 1
             title_color = 'r'
-            fig_name_add = '_not_used'
-        elif switch_1d == 1 and switch_haven == 'Nee' and Hs_basis < 0 and Hs_out > 0:
+            fig_name_add = '_haven'
+        elif switch_haven == 'Nee' and Hs_basis < 0 and Hs_out > 0:
             use_2d      = 0
             use_1d      = 1
             use_haven   = 0
             title_color = 'k'
-            fig_name_add = '_used'
+            fig_name_add = '_SWAN1D'
         elif switch_1d == 1 and switch_haven == 'Nee' and abs(Hs_diff) <= 0.2 and abs(Tm10_diff) <= 0.25 and Hs_out > 0 and ~np.isnan(Hs_out): 
             if Hs_decr_rel <= -0.10 or z_200m_avg >= 1:
                 use_2d      = 0
                 use_1d      = 1
                 use_haven   = 0
                 title_color = 'k'
-                fig_name_add = '_used'
+                fig_name_add = '_SWAN1D'
             else:
                 use_2d      = 1
                 use_1d      = 0
                 use_haven   = 0
                 title_color = 'r'
-                fig_name_add = '_not_used'
+                fig_name_add = '_SWAN2D'
         else:
             use_2d      = 1
             use_1d      = 0
             use_haven   = 0
             title_color = 'r'
-            fig_name_add = '_not_used'
+            fig_name_add = '_SWAN2D'
     else:
         title_color = 'k'
         fig_name_add = ''
     
     # now make the figure
+    if make_fig:
     
-    fig = plt.figure(figsize=(12,7))
-    ax1 = plt.subplot(2,1,1)
-    ax1_copy = ax1.twinx()
+        fig = plt.figure(figsize=(12,7))
+        ax1 = plt.subplot(2,1,1)
+        ax1_copy = ax1.twinx()
+        
+        ax1.plot(data['Xp'],-data['Botlev'],'k', linewidth = 3, label = 'bodem')
+        ax1.plot(data['Xp'], data['Watlev'], 'b-', linewidth = 1.5, label = 'waterstand')
+        ax1.axvline(x = Xpteen, color = 'k', linestyle='--', label = 'teen')
+        ax1.axvline(x = Xpout, color = 'r', linestyle='--', label = 'teen + 1/2*L')
+        ax1.axvline(x = Xp_300, color = 'tab:orange', linestyle='--', label = 'teen + 300m')
+        # ax1.axvline(x = Xp_basis, color = 'y', linestyle='--', label = 'HRbasis')
+        ax1.set_ylabel('hoogte [m+NAP]')
+        ax1.set_xlabel('afstand [m]')
+        ax1.legend(loc = 'lower right')
+        # ax1.set_xlim(30,100)
+        # ax1.set_ylim(-20,10)
     
-    ax1.plot(data['Xp'],-data['Botlev'],'k', linewidth = 3, label = 'bodem')
-    ax1.plot(data['Xp'], data['Watlev'], 'b-', linewidth = 1.5, label = 'waterstand')
-    ax1.axvline(x = Xpteen, color = 'k', linestyle='--', label = 'teen')
-    ax1.axvline(x = Xpout, color = 'r', linestyle='--', label = 'teen + 1/2*L')
-    ax1.axvline(x = Xp_300, color = 'tab:orange', linestyle='--', label = 'teen + 300m')
-    # ax1.axvline(x = Xp_basis, color = 'y', linestyle='--', label = 'HRbasis')
-    ax1.set_ylabel('hoogte [m+NAP]')
-    ax1.set_xlabel('afstand [m]')
-    ax1.legend(loc = 'lower right')
-    # ax1.set_xlim(30,100)
-    # ax1.set_ylim(-20,10)
-
-    ax1_copy.plot(data['Xp'], data['Hsig'],'g', linewidth = 1.5, label = '$H_s$ [m]')
-    ax1_copy.set_ylabel('$H_s$ [m]',color='g')
-    ax1_copy.tick_params(labelcolor='g')
-    t1 = ax1_copy.text(Xpin,Hs_in,f'BC: Hs = {Hs_rand:.2f} m \nIN:  Hs = {Hs_in:.2f} m',color='g',fontweight = 'bold')
-    t2 = ax1_copy.text(Xpout+10,Hs_out,f'Hs = {Hs_out:.2f} m',color='g',fontweight = 'bold')
-    t3 = ax1_copy.text(Xp_300+10,Hs_300,f'SWAN2D: Hs = {Hs_300_2d:.2f} m \nSWAN1D: Hs = {Hs_300:.2f} m',color='g',fontweight = 'bold')
-    t1.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    t2.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    plt.title(f'{scene}\n{simulation}\n HRbasis: Hs = {Hs_basis:.2f} m, Tm10 = {Tm10_basis:.2f}\n L = {Wlen:.0f} m, Hs/D = {Hs_D:.2f}, z_200m_avg = {z_200m_avg:.1f} m', color = title_color)
-    ax1_copy.legend(loc = 'center right')
-    ax1_copy.set_ylim(0,np.ceil(Hs_max))
+        ax1_copy.plot(data['Xp'], data['Hsig'],'g', linewidth = 1.5, label = '$H_s$ [m]')
+        ax1_copy.set_ylabel('$H_s$ [m]',color='g')
+        ax1_copy.tick_params(labelcolor='g')
+        t1 = ax1_copy.text(Xpin,Hs_in,f'BC: Hs = {Hs_rand:.2f} m \nIN:  Hs = {Hs_in:.2f} m',color='g',fontweight = 'bold')
+        t2 = ax1_copy.text(Xpout+10,Hs_out,f'Hs = {Hs_out:.2f} m',color='g',fontweight = 'bold')
+        t3 = ax1_copy.text(Xp_300+10,Hs_300,f'SWAN2D: Hs = {Hs_300_2d:.2f} m \nSWAN1D: Hs = {Hs_300:.2f} m',color='g',fontweight = 'bold')
+        t1.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+        t2.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+        t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+        plt.title(f'{scene}\n{simulation}\n HRbasis: Hs = {Hs_basis:.2f} m, Tm10 = {Tm10_basis:.2f}\n L = {Wlen:.0f} m, Hs/D = {Hs_D:.2f}, z_200m_avg = {z_200m_avg:.1f} m', color = title_color)
+        ax1_copy.legend(loc = 'center right')
+        ax1_copy.set_ylim(0,np.ceil(Hs_max))
+        
+        ax2 = plt.subplot(2,1,2)
+        ax2_copy = ax2.twinx()
+        ax2.plot(data['Xp'],-data['Botlev'],'k', linewidth = 3, label = 'bodem')
+        ax2.plot(data['Xp'], data['Watlev'], 'b-', linewidth = 1.5, label = 'waterstand')
+        ax2.axvline(x = Xpteen, color = 'k', linestyle='--', label = 'teen')
+        ax2.axvline(x = Xpout, color = 'r', linestyle='--', label = 'teen + 1/2*L')
+        ax2.axvline(x = Xp_300, color = 'tab:orange', linestyle='--', label = 'teen + 300m')
+        # ax2.axvline(x = Xp_basis, color = 'y', linestyle='--', label = 'HRbasis')
+        ax2.set_ylabel('hoogte [m+NAP]')
+        ax2.set_xlabel('afstand [m]')
+        ax2.legend(loc = 'lower right')
+        # ax2.set_xlim(30,100)
+        # ax2.set_ylim(-20,10)
     
-    ax2 = plt.subplot(2,1,2)
-    ax2_copy = ax2.twinx()
-    ax2.plot(data['Xp'],-data['Botlev'],'k', linewidth = 3, label = 'bodem')
-    ax2.plot(data['Xp'], data['Watlev'], 'b-', linewidth = 1.5, label = 'waterstand')
-    ax2.axvline(x = Xpteen, color = 'k', linestyle='--', label = 'teen')
-    ax2.axvline(x = Xpout, color = 'r', linestyle='--', label = 'teen + 1/2*L')
-    ax2.axvline(x = Xp_300, color = 'tab:orange', linestyle='--', label = 'teen + 300m')
-    # ax2.axvline(x = Xp_basis, color = 'y', linestyle='--', label = 'HRbasis')
-    ax2.set_ylabel('hoogte [m+NAP]')
-    ax2.set_xlabel('afstand [m]')
-    ax2.legend(loc = 'lower right')
-    # ax2.set_xlim(30,100)
-    # ax2.set_ylim(-20,10)
+        # ax2_copy.plot(data['Xp'], data['Tm_10'],color='orange')
+        ax2_copy.plot(data['Xp'], data['Tm_10'],'m', linewidth = 1.5,label = '$T_m-1,0$ [m]')
+        ax2_copy.set_ylabel('$H_s$ [m]',color='m')
+        ax2_copy.tick_params(labelcolor='m')
+        t3 = ax2_copy.text(Xpin,Tm10_in,f'BC: Tp = {Tp_rand:.2f} s \nIN:  Tp = {Tp_in:.2f} s',color='m',fontweight = 'bold')
+        t4 = ax2_copy.text(Xpout+10,Tm10_out,f'Tm_10 = {Tm10_out:.2f} s',color='m',fontweight = 'bold')
+        t5 = ax2_copy.text(Xp_300+10,Tm10_300,f'SWAN2D: Tm_10 = {Tm10_300_2d:.2f} s \nSWAN1D: Tm_10 = {Tm10_300:.2f} s',color='m',fontweight = 'bold')
+        t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+        t4.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+        t5.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
+        ax2_copy.set_ylabel('$T_{m-1.0}$ [s]')
+        ax2_copy.legend(loc = 'center right')
+        ax2_copy.set_ylim(0,np.ceil(Tm10_max))
+           
+        if save_fig:
+            save_name = os.path.join(output_path, scene+'_'+simulation+fig_name_add+'.png')
+            save_plot.save_plot(fig,save_name,ax = ax1_copy, dx = -0.05)
 
-    # ax2_copy.plot(data['Xp'], data['Tm_10'],color='orange')
-    ax2_copy.plot(data['Xp'], data['Tm_10'],'m', linewidth = 1.5,label = '$T_m-1,0$ [m]')
-    ax2_copy.set_ylabel('$H_s$ [m]',color='m')
-    ax2_copy.tick_params(labelcolor='m')
-    t3 = ax2_copy.text(Xpin,Tm10_in,f'BC: Tp = {Tp_rand:.2f} s \nIN:  Tp = {Tp_in:.2f} s',color='m',fontweight = 'bold')
-    t4 = ax2_copy.text(Xpout+10,Tm10_out,f'Tm_10 = {Tm10_out:.2f} s',color='m',fontweight = 'bold')
-    t5 = ax2_copy.text(Xp_300+10,Tm10_300,f'SWAN2D: Tm_10 = {Tm10_300_2d:.2f} s \nSWAN1D: Tm_10 = {Tm10_300:.2f} s',color='m',fontweight = 'bold')
-    t3.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    t4.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    t5.set_bbox(dict(facecolor='white', alpha=1, edgecolor='black'))
-    ax2_copy.set_ylabel('$T_{m-1.0}$ [s]')
-    ax2_copy.legend(loc = 'center right')
-    ax2_copy.set_ylim(0,np.ceil(Tm10_max))
-       
-    if save_fig:
-        save_name = os.path.join(output_path, scene+'_'+simulation+fig_name_add+'.png')
-        save_plot.save_plot(fig,save_name,ax = ax1_copy, dx = -0.05)
-
+        #%% Clear some memory (required when looping over multiple simulations)
+        
+        plt.close('all')
+        del fig
+    
+        del ax1, ax1_copy, ax2, ax2_copy, t1, t2, t3, t4, t5
+    
     #%% Clear some memory (required when looping over multiple simulations)
-    
-    plt.close('all')
-    del fig
     del data
-    del ax1, ax1_copy, ax2, ax2_copy, t1, t2, t3, t4, t5
     gc.collect()
 
 #%% Export output to Excel
 
 output_df = pd.DataFrame(appended_output)
 if save_result:
-    output_df.to_excel(os.path.join(path_main,'output_productie_SWAN1D_WZ.xlsx')) 
+    output_df.to_excel(os.path.join(path_main,'output_productie_SWAN1D_WZ_iter_03.xlsx')) 

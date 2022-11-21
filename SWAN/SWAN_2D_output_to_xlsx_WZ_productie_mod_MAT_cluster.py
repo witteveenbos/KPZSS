@@ -40,7 +40,7 @@ from scipy.io import loadmat
 #%% Settings
 
 # Location of SWAN2D output
-path_main   = r'/project/130991_Systeemanalyse_ZSS/3.Models\SWAN/2D/Waddenzee/03_productiesommen/serie_01/G2'
+path_main   = r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/2D/Waddenzee/03_productiesommen/serie_01/G2'
 dirs        = list_files_folders.list_folders(path_main, dir_incl='WZ', startswith = True, endswith = False)
 
 # Shapefile with OKADER vak info (including id and fragility curve info)
@@ -76,7 +76,6 @@ df_coupling = np.array(df_coupling)
 OKids = df_ids['VakId']
 X = df_ids['xcoord']
 Y = df_ids['ycoord']
-
 
 #%% first loop over all OKADR ids to get SWAN som number
 
@@ -155,8 +154,9 @@ appended_data_01 = []
 for diri in dirs:
     ix = 0
     dirname = os.path.basename(os.path.normpath(diri))
+    
     for OKid in OKids:
-        
+               
         som_id = assignment[assignment['OKid']==OKid]['som_id']
         
         subdir = list_files_folders.list_folders(diri, dir_incl="ID%03d" % som_id)       
@@ -164,7 +164,7 @@ for diri in dirs:
         
         files = list_files_folders.list_files('.TAB', subdir, startswith = False, endswith = True)
         subdirname = os.path.basename(os.path.normpath(subdir))
-        scen_name = diri.split("\\")[-1]
+        scen_name = diri.split("/")[-1]
         for file in files:
             f = os.path.basename(os.path.normpath(file))
             if f.startswith(outlocs_name):
@@ -248,8 +248,8 @@ for diri in dirs:
         
         ix = ix + 1
         
-        del data, result, dis, xx, yy, xq, yq  
-                           
+        del data, result, dis, xx, yy, xq, yq
+                                     
 appended_data_01 = pd.concat(appended_data_01)
 print('maximum distace with SWAN output loc = %.2f' % min_dis_max)
 
@@ -282,7 +282,7 @@ for diri in dirs:
         
         files = list_files_folders.list_files('.TAB', subdir, startswith = False, endswith = True)
         subdirname = os.path.basename(os.path.normpath(subdir))
-        scen_name = diri.split("\\")[-1]
+        scen_name = diri.split("/")[-1]
         for file in files:
             f = os.path.basename(os.path.normpath(file))
             if f.startswith(outlocs_name):
@@ -408,7 +408,7 @@ for diri in dirs:
         
         files = list_files_folders.list_files('.TAB', subdir, startswith = False, endswith = True)
         subdirname = os.path.basename(os.path.normpath(subdir))
-        scen_name = diri.split("\\")[-1]
+        scen_name = diri.split("/")[-1]
         for file in files:
             f = os.path.basename(os.path.normpath(file))
             if f.startswith(outlocs_name):

@@ -35,16 +35,16 @@ import numpy as np
 
 #%% Settings
 
-dirs = {'main':     r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_01',
-        'bathy':    r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/_bodem',
-        'input':    r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/iter_01/input'}
+dirs = {'main':     r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/serie_02/iter_01',
+        'bathy':    r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/serie_02/_bodem',
+        'input':    r'/project/130991_Systeemanalyse_ZSS/3.Models/SWAN/1D/Waddenzee/02_productie/serie_02/iter_01/input'}
 
 files = {'swan_templ':  'template.swn',
          'qsub_templ':  'dummy.qsub',
          'scen_xlsx':   'scenarios_SWAN_2D_WZ_v02.xlsx',
-         'swan_output': 'output_productie_SWAN2D_WZ.xlsx'}
+         'swan_output': 'output_productie_SWAN2D_WZ_v3.xlsx'}
 
-outloc = 'HRext01'
+outloc = 'HRext01_300m'
 
 node = 'despina'
 ppn = 1
@@ -71,7 +71,7 @@ for ss in range(len(df_scen)):
     if ss <= 7:
         node    = 'despina'
     elif 7 < ss <= 15:
-        node    = 'galatea'
+        node    = 'despina'
     
     # make scenario directory
     dir_scen = os.path.join(dirs['main'], str(df_scen.Naam[ss]))
@@ -153,6 +153,16 @@ for ss in range(len(df_scen)):
             dspr        = df_input_scen['Dspr'][cc]
             gamma       = 3.3
             locid       = str(df_input_scen['OkaderId'][cc])
+            
+            # replace nans
+            if np.isnan(wl) or np.isnan(ws) or np.isnan(wd) or np.isnan(hs) or np.isnan(tp) or np.isnan(dirw):
+                wl      = 0
+                ws      = 0
+                wd      = 0
+                hs      = 0
+                tp      = 0
+                dirw    = 0            
+            
             conid       = "WZ%02dWD%03dHS%02dTP%02dDIR%03d" % (ws, wd_name, hs, tp, dirw)
             runid       = 'ID' + locid + '_' + conid
             swan_out    = runid + '.swn'
